@@ -7,4 +7,13 @@ set(CMAKE_CXX_FLAGS, "${CXX_FLAGS}")
 
 project(pacman)
 
-add_executable(pacman src/main.cpp)
+find_package(SDL2 REQUIRED)
+include_directories(${SDL_INCLUDE_DIRS})
+
+add_executable(pacman src/main.cpp src/MazeUtils.cpp)
+# add_executable(pacman src/main.cpp src/MazeUtils.cpp)
+string(STRIP ${SDL2_LIBRARIES} SDL2_LIBRARIES)
+target_link_libraries(pacman ${SDL2_LIBRARIES})
+
+
+
