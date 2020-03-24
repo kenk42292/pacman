@@ -1,10 +1,12 @@
 #ifndef PACMAN_PACMAN_H_
 #define PACMAN_PACMAN_H_
 
+#include "ui/KeyEventListener.h"
+
 namespace pacman {
 
-class Pacman {
-
+class Pacman : public KeyEventListener {
+    void onKeyEvent(int scanCode) override;
 };
 
 } // pacman
