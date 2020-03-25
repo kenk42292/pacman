@@ -14,8 +14,7 @@ namespace pacman {
 
 class Maze {
 public:
-    Maze(std::string mazeConfigPath, long cellHeight, long cellWidth);
-    ~Maze();
+    Maze(std::shared_ptr<std::vector<std::vector<Cell>>> mazeMatrix, long cellHeight, long cellWidth);
     void init();
     std::shared_ptr<std::vector<std::vector<Cell>>> getMazeMatrix();
     std::shared_ptr<Pacman> getPacman();
@@ -27,8 +26,6 @@ private:
     std::shared_ptr<std::vector<std::vector<Cell>>> mazeMatrix;
     std::shared_ptr<Pacman> pacman;
     std::vector<std::shared_ptr<Ghost>> ghosts;
-    std::shared_ptr<std::vector<std::vector<Cell>>> readMazeMatrix(std::string mazeFilePath);
-    Cell charToCell(char & c);
     long cellHeight;
     long cellWidth;
 };

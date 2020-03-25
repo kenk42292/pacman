@@ -9,11 +9,18 @@
 
 namespace pacman {
 
+/**
+ * Responsible for parsing inputs, and starting the game by standing up all the 
+ * components of the game: Agents and UI.
+ */
 class Game {
 public:
     Game(std::string gameConfigFolderPath, std::string imgFolderPath);
-    const long CELL_WIDTH = 30;
-    const long CELL_HEIGHT = 30;
+    const long CELL_WIDTH = 20;
+    const long CELL_HEIGHT = 20;
+    const std::string PACMAN = "pacman";
+    const std::string GHOST = "ghost";
+    const char DELIM = ',';
     void start();
 private:
     std::shared_ptr<Maze> maze;
@@ -23,6 +30,9 @@ private:
     void initMaze(std::string mazeConfigPath);
     void initAgents(std::string agentsConfigPath);
     void initUI(std::string imgFolderPath);
+    std::shared_ptr<std::vector<std::vector<Cell>>> readMazeMatrix(std::string mazeFilePath);
+    Cell charToCell(char & c);
+    std::vector<std::pair<long, long>> parseLocationByPrefix(std::string agentsConfigPath, std::string agent);
 };
 
 }
