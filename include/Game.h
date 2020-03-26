@@ -32,7 +32,8 @@ private:
     void initUI(std::string imgFolderPath);
     std::shared_ptr<std::vector<std::vector<Cell>>> readMazeMatrix(std::string mazeFilePath);
     Cell charToCell(char & c);
-    std::vector<std::pair<long, long>> parseLocationByPrefix(std::string agentsConfigPath, std::string agent);
+    std::vector<std::pair<int, int>> parseIndicesByPrefix(std::string agentsConfigPath, std::string agent);
+    long indexToLocation(int index, long scale);
 };
 
 }

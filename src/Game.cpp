@@ -30,16 +30,22 @@ void pacman::Game::initMaze(std::string mazeConfigPath) {
 }
 
 void pacman::Game::initAgents(std::string agentsConfigPath) {
-    auto pacmanLocationVector = parseLocationByPrefix(agentsConfigPath, PACMAN);
-    if (pacmanLocationVector.size() == 0) {
+    long y, x;
+
+    auto pacmanIndicesVector = parseIndicesByPrefix(agentsConfigPath, PACMAN);
+    if (pacmanIndicesVector.size() == 0) {
         throw std::invalid_argument("No pacman location found.");
     }
-    auto pacmanLocation = pacmanLocationVector.at(0);
-    pacman = std::make_shared<Pacman>(pacmanLocation.first, pacmanLocation.second);
+    auto pacmanIndeces = pacmanIndicesVector.at(0);
+    y = indexToLocation(pacmanIndeces.first, CELL_HEIGHT);
+    x = indexToLocation(pacmanIndeces.second, CELL_WIDTH);
+    pacman = std::make_shared<Pacman>(y, x);
 
-    auto ghostLocationsVector = parseLocationByPrefix(agentsConfigPath, GHOST);
-    for (auto ghostLocation : ghostLocationsVector) {
-        ghosts.push_back(std::make_shared<Ghost>(ghostLocation.first, ghostLocation.second));
+    auto ghostIndicesVector = parseIndicesByPrefix(agentsConfigPath, GHOST);
+    for (auto ghostIndices : ghostIndicesVector) {
+        y = indexToLocation(ghostIndices.first, CELL_HEIGHT);
+        x = indexToLocation(ghostIndices.second, CELL_WIDTH);
+        ghosts.push_back(std::make_shared<Ghost>(y, x));
     }
 }
 
@@ -92,7 +98,7 @@ pacman::Cell pacman::Game::charToCell(char & c) {
     }
 }
 
-std::vector<std::pair<long, long>> pacman::Game::parseLocationByPrefix(std::string agentsConfigPath, std::string agent) {
+std::vector<std::pair<int, int>> pacman::Game::parseIndicesByPrefix(std::string agentsConfigPath, std::string agent) {
     if (agent != PACMAN && agent != GHOST) {
         throw std::invalid_argument("Agent must be either pacman or ghost.");
     }
@@ -103,7 +109,7 @@ std::vector<std::pair<long, long>> pacman::Game::parseLocationByPrefix(std::stri
         exit(1);
     }
 
-    std::vector<std::pair<long, long>> result;
+    std::vector<std::pair<int, int>> result;
     std::string line;
     while (std::getline(agentsConfigFileStream, line)) {
         // remove spaces
@@ -113,11 +119,15 @@ std::vector<std::pair<long, long>> pacman::Game::parseLocationByPrefix(std::stri
         {
             std::string locStr = line.substr(agent.length() + 1);
             int delimIndex = locStr.find(DELIM);
-            long i = stol(locStr.substr(0, delimIndex));
-            long j = stol(locStr.substr(delimIndex+1));
+            int i = stol(locStr.substr(0, delimIndex));
+            int j = stol(locStr.substr(delimIndex+1));
             result.push_back(std::make_pair(i, j));
         }
     }
 
     return result;
+}
+
+long pacman::Game::indexToLocation(int index, long scale) {
+    return index*scale + scale/2;
 }

@@ -10,8 +10,8 @@ public:
     long getX() const;
     long getVelocity() const;
 private:
-    long y;
-    long x;
+    long y; // y-value of the CENTER of the agent
+    long x; // x-value of the CENTER of the agent
     long velocity;
 };
 
