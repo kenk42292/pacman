@@ -11,3 +11,15 @@ void pacman::Agent::start() {
 void pacman::Agent::stop() {
     alive.store(false);
 }
+
+long pacman::Agent::getY() const {
+    return y;
+}
+
+long pacman::Agent::getX() const {
+    return x;
+}
+
+long pacman::Agent::getVelocity() const {
+    return velocity;
+}

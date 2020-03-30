@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "../Maze.h"
+#include "../Pacman.h"
 
 namespace pacman {
 namespace ui {
@@ -25,7 +26,7 @@ private:
     SDL_Renderer* sdlRenderer;
     SDL_Texture* sdlTexture;
     SDL_Texture* pelletTexture;
-    SDL_Texture* pacmanTexture;
+    std::vector<SDL_Texture*> pacmanTextures;
 
     // SDL_Texture* pacmanTexture;
     // std::vector<SDL_Texture*> ghostTextures;
@@ -51,6 +52,8 @@ private:
     void maybeThrowRuntimeError(bool throwError, std::string message);
     void scale(SDL_Rect & rect, float scale);
     std::string getPacmanImage();
+    long orientationToDegrees(Pacman::Orientation orientation);
+    SDL_Texture* mouthDegreesToTexture(long mouthDegrees);
 };
 
 } // ui
