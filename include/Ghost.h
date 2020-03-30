@@ -8,7 +8,7 @@ namespace pacman {
 class Ghost : public Agent {
 public:
     static const long GHOST_VELOCITY = 45;
-    Ghost(long y, long x);
+    Ghost(long y, long x, std::shared_ptr<Maze> maze);
 private:
 };
 

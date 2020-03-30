@@ -2,12 +2,16 @@
 #define PACMAN_GAME_H
 
 #include <string>
+#include <memory>
 #include <vector>
 
-#include "../include/Maze.h"
-#include "../include/ui/SDLWrapper.h"
+#include "Maze.h"
+#include "ui/SDLWrapper.h"
 
 namespace pacman {
+
+class Pacman;
+class Ghost;
 
 /**
  * Responsible for parsing inputs, and starting the game by standing up all the 
@@ -30,8 +34,8 @@ private:
     void initMaze(std::string mazeConfigPath);
     void initAgents(std::string agentsConfigPath);
     void initUI(std::string imgFolderPath);
-    std::shared_ptr<std::vector<std::vector<Cell>>> readMazeMatrix(std::string mazeFilePath);
-    Cell charToCell(char & c);
+    std::shared_ptr<std::vector<std::vector<Maze::Cell>>> readMazeMatrix(std::string mazeFilePath);
+    Maze::Cell charToCell(char & c);
     std::vector<std::pair<int, int>> parseIndicesByPrefix(std::string agentsConfigPath, std::string agent);
     long indexToLocation(int index, long scale);
 };

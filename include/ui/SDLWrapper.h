@@ -7,11 +7,12 @@
 #include <string>
 #include <vector>
 
-#include "../../include/ui/KeyEventListener.h"
-#include "../../include/Maze.h"
+#include "../Maze.h"
 
 namespace pacman {
 namespace ui {
+
+class KeyEventListener;
 
 class SDLWrapper {
 public:
@@ -23,11 +24,15 @@ private:
     SDL_Window* sdlWindow;
     SDL_Renderer* sdlRenderer;
     SDL_Texture* sdlTexture;
-    SDL_Texture* dotTexture;
+    SDL_Texture* pelletTexture;
+    SDL_Texture* pacmanTexture;
+
+    // SDL_Texture* pacmanTexture;
+    // std::vector<SDL_Texture*> ghostTextures;
     bool quit = false;
     SDL_Event e;
     std::vector<std::shared_ptr<KeyEventListener>> keyEventListeners;
-    std::shared_ptr<std::vector<std::vector<Cell>>> mazeMatrix;
+    std::shared_ptr<std::vector<std::vector<Maze::Cell>>> mazeMatrix;
     std::shared_ptr<Pacman> pacman;
     std::vector<std::shared_ptr<Ghost>> ghosts;
     long cellHeight;
@@ -38,12 +43,14 @@ private:
     void initSDL();
     void initWindow();
     void initRenderer();
-    void initTexture();
-    void initDotTexture();
+    void initTextures();
     void renderMaze();
     void renderPacman();
     void renderGhosts();
     void notifyKeyEventListeners(int scanCode);
+    void maybeThrowRuntimeError(bool throwError, std::string message);
+    void scale(SDL_Rect & rect, float scale);
+    std::string getPacmanImage();
 };
 
 } // ui
