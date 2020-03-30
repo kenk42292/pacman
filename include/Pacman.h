@@ -36,6 +36,7 @@ private:
   MouthDirection mouthDirection;
   std::pair<long, long> nextLocation(Orientation orientation);
   std::pair<long, long> nextCellLocation(Orientation orientation);
+  std::atomic_long numPelletsEaten;
 };
 
 } // namespace pacman

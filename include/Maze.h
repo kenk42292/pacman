@@ -25,7 +25,7 @@ public:
   // void injectAgents(Pacman pacman, std::vector<std::shared_ptr<Ghost>> ghosts);
   long getCellHeight();
   long getCellWidth();
-
+  bool clearPellet(std::pair<long, long> agentCenter);
 private:
   std::shared_ptr<std::vector<std::vector<Cell>>> mazeMatrix;
   // std::shared_ptr<Pacman> pacman;

@@ -14,7 +14,9 @@ pacman::Pacman::Pacman(long y, long x, std::shared_ptr<Maze> maze)
 void pacman::Pacman::start() {
   Agent::start();
   while (alive.load()) {
+
     std::cout << *this << '\n';
+
     // Delay
     std::this_thread::sleep_for(std::chrono::milliseconds(30));
 
@@ -34,8 +36,14 @@ void pacman::Pacman::start() {
       break;
     }
 
-    // Move
+    // Eat Pellet
     std::pair<long, long> currentLocation = std::make_pair(y, x);
+    bool pelletEaten = maze->clearPellet(currentLocation);
+    if (pelletEaten) {
+      numPelletsEaten++;
+    }
+
+    // Move
     std::pair<long, long> nextDesiredLocation =
         this->nextLocation(desiredOrientation);
     std::pair<long, long> nextLocation = this->nextLocation(orientation);
@@ -185,6 +193,7 @@ std::ostream &operator<<(std::ostream &outputStream,
   outputStream << "pacman{loc[" << pacman.y << ", " << pacman.x << "] vel["
                << pacman.velocity << "] orientation:[" << pacman.orientation
                << "] mouthDegrees:[" << pacman.mouthDegrees
-               << "] mouthDirection:[" << pacman.mouthDirection << "]}";
+               << "] mouthDirection:[" << pacman.mouthDirection
+               << "] << numPelletsEaten:[" << pacman.numPelletsEaten << "]}";
 }
 } // namespace pacman

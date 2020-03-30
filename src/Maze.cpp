@@ -45,3 +45,13 @@ bool pacman::Maze::isCellAligned(std::pair<long, long> location) {
 long pacman::Maze::distance(std::pair<long, long> a, std::pair<long, long> b) {
     return std::abs(a.first-b.first) + std::abs(a.second-b.second);
 }
+
+bool pacman::Maze::clearPellet(std::pair<long, long> agentCenter) {
+    int i = agentCenter.first/cellHeight;
+    int j = agentCenter.second/cellWidth;
+    if (mazeMatrix->at(i).at(j) == Maze::Cell::kPellet) {
+        mazeMatrix->at(i).at(j) = Maze::Cell::kEmpty;
+        return true;
+    }
+    return false;
+}
