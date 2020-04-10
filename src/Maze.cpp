@@ -36,9 +36,19 @@ bool pacman::Maze::isValid(std::pair<long, long> location) {
             && mazeMatrix->at(i2).at(j2) != Cell::kBorder;
 }
 
+bool pacman::Maze::isCellValid(std::pair<int, int> coordinates) {
+    int i = coordinates.first, j = coordinates.second;
+    return mazeMatrix->at(i).at(j) != Cell::kBorder;
+}
+
 bool pacman::Maze::isCellAligned(std::pair<long, long> location) {
     long y = location.first, x = location.second;
     return (y-cellHeight/2) % cellHeight == 0 && (x-cellWidth/2) % cellHeight == 0;
+}
+
+bool pacman::Maze::isAxisAligned(std::pair<long, long> location) {
+    long y = location.first, x = location.second;
+    return (y-cellHeight/2) % cellHeight == 0 || (x-cellWidth/2) % cellHeight == 0;
 }
 
 // TODO: Currently the manhattan distance

@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "../../include/Pacman.h"
+#include "../../include/Ghost.h"
 #include "../../include/ui/KeyEventListener.h"
 #include "../../include/ui/SDLWrapper.h"
 
@@ -55,6 +56,9 @@ void pacman::ui::SDLWrapper::start() {
         if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
           quit = true;
           pacman->stop();
+          for (auto ghost=ghosts.begin(); ghost < ghosts.end(); ghost++) {
+            (*ghost)->stop();
+          }
         } else {
           notifyKeyEventListeners(e.key.keysym.scancode);
         }
@@ -64,7 +68,7 @@ void pacman::ui::SDLWrapper::start() {
     SDL_RenderClear(sdlRenderer);
     renderMaze();
     renderPacman();
-    // renderGhosts();
+    renderGhosts();
     SDL_RenderPresent(sdlRenderer);
   }
 }

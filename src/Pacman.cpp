@@ -15,8 +15,6 @@ void pacman::Pacman::start() {
   Agent::start();
   while (alive.load()) {
 
-    std::cout << *this << '\n';
-
     // Delay
     std::this_thread::sleep_for(std::chrono::milliseconds(30));
 
@@ -104,19 +102,15 @@ long pacman::Pacman::getMouthDegrees() { return mouthDegrees; }
 void pacman::Pacman::onKeyEvent(int scanCode) {
   switch (scanCode) {
   case SDL_SCANCODE_LEFT:
-    std::cout << "LEFT" << '\n';
     desiredOrientation = Orientation::LEFT;
     break;
   case SDL_SCANCODE_RIGHT:
-    std::cout << "RIGHT" << '\n';
     desiredOrientation = Orientation::RIGHT;
     break;
   case SDL_SCANCODE_UP:
-    std::cout << "UP" << '\n';
     desiredOrientation = Orientation::UP;
     break;
   case SDL_SCANCODE_DOWN:
-    std::cout << "DOWN" << '\n';
     desiredOrientation = Orientation::DOWN;
     break;
   default:

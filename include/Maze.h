@@ -18,7 +18,9 @@ public:
   void init();
   std::shared_ptr<std::vector<std::vector<Cell>>> getMazeMatrix();
   bool isValid(std::pair<long, long> location);
+  bool isCellValid(std::pair<int, int> coordinates);
   bool isCellAligned(std::pair<long, long> location);
+  bool isAxisAligned(std::pair<long, long> location);
   long distance(std::pair<long, long> a, std::pair<long, long> b);
   // std::shared_ptr<Pacman> getPacman();
   // std::vector<std::shared_ptr<Ghost>> getGhosts();
