@@ -20,12 +20,10 @@ pacman::Game::Game(std::string gameConfigFolderPath,
 void pacman::Game::start() {
   auto pacmanFuture =
       std::async(std::launch::async, [this]() { pacman->start(); });
-  // std::vector<std::future<void>> ghostFutures;
-  // for (auto ghost = ghosts.begin(); ghost < ghosts.end(); ghost++) {
-  //   ghostFutures.push_back(std::async(std::launch::async, [ghost]() { (*ghost)->start(); }));
-  // }
-  auto ghostFuture =
-      std::async(std::launch::async, [this]() { ghosts.at(0)->start(); });
+  std::vector<std::future<void>> ghostFutures;
+  for (auto ghost = ghosts.begin(); ghost < ghosts.end(); ghost++) {
+    ghostFutures.push_back(std::async(std::launch::async, [ghost]() { (*ghost)->start(); }));
+  }
   sdlWrapper->addKeyEventListener(pacman);
   sdlWrapper->start();
 }
@@ -53,7 +51,6 @@ void pacman::Game::initAgents(std::string agentsConfigPath) {
     x = indexToLocation(ghostIndices.second, CELL_WIDTH);
     std::cout << "Creating ghost at y:" << y << " , x:" << x << "\n";
     ghosts.push_back(std::make_shared<Ghost>(y, x, maze, pacman));
-    break;
   }
 }
 

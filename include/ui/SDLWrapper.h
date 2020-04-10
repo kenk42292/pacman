@@ -27,6 +27,7 @@ private:
     SDL_Texture* sdlTexture;
     SDL_Texture* pelletTexture;
     std::vector<SDL_Texture*> pacmanTextures;
+    std::vector<SDL_Texture*> ghostTextures;
 
     // SDL_Texture* pacmanTexture;
     // std::vector<SDL_Texture*> ghostTextures;

@@ -34,7 +34,7 @@ void pacman::Ghost::start() {
     int delta_j = nextCellPosition.second - currentCellPosition.second;
     // <delta_i, delta_j> should be a one-hot pair.
     long delta_y = delta_i * velocity;
-    long delta_x = delta_x * velocity;
+    long delta_x = delta_j * velocity;
     long y_final = this->y + delta_y;
     long x_final = this->x + delta_x;
     std::pair<long, long> loc_final = std::make_pair(y_final, x_final);

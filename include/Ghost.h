@@ -13,7 +13,7 @@ class Ghost : public Agent {
 
 public:
   static const long GHOST_VELOCITY =
-      3; // same as pacman. However, ghosts are slower anyway, because of A*
+      2; // same as pacman. However, ghosts are slower anyway, because of A*
          // search latency.
   Ghost(long y, long x, std::shared_ptr<Maze> maze,
         std::shared_ptr<Pacman> pacman);

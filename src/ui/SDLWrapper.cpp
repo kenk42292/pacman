@@ -8,8 +8,8 @@
 #include <thread>
 #include <vector>
 
-#include "../../include/Pacman.h"
 #include "../../include/Ghost.h"
+#include "../../include/Pacman.h"
 #include "../../include/ui/KeyEventListener.h"
 #include "../../include/ui/SDLWrapper.h"
 
@@ -56,7 +56,7 @@ void pacman::ui::SDLWrapper::start() {
         if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
           quit = true;
           pacman->stop();
-          for (auto ghost=ghosts.begin(); ghost < ghosts.end(); ghost++) {
+          for (auto ghost = ghosts.begin(); ghost < ghosts.end(); ghost++) {
             (*ghost)->stop();
           }
         } else {
@@ -135,11 +135,30 @@ void pacman::ui::SDLWrapper::initTextures() {
     maybeThrowRuntimeError(pacmanSurface == NULL,
                            "Error initializing pacman surface: \n" +
                                std::string(SDL_GetError()));
-    pacmanTextures.push_back(
-        SDL_CreateTextureFromSurface(sdlRenderer, pacmanSurface));
+    SDL_Texture *pacmanTexture =
+        SDL_CreateTextureFromSurface(sdlRenderer, pacmanSurface);
+    pacmanTextures.push_back(pacmanTexture);
     SDL_FreeSurface(pacmanSurface);
-    maybeThrowRuntimeError(!sdlTexture,
+    maybeThrowRuntimeError(!pacmanTexture,
                            "Error initializing pacman texture: \n" +
+                               std::string(SDL_GetError()));
+  }
+
+  // Ghost Textures
+  std::vector<std::string> ghostImagePaths{"/blinky-0.png", "/clyde-0.png",
+                                           "/inky-0.png", "/pinky-0.png"};
+  for (auto iter = ghostImagePaths.begin(); iter < ghostImagePaths.end();
+       iter++) {
+    SDL_Surface *ghostSurface = IMG_Load((imgFolderPath + *iter).c_str());
+    maybeThrowRuntimeError(ghostSurface == NULL,
+                           "Error initializing ghost surface: \n" +
+                               std::string(SDL_GetError()));
+    SDL_Texture *ghostTexture =
+        SDL_CreateTextureFromSurface(sdlRenderer, ghostSurface);
+    ghostTextures.push_back(ghostTexture);
+    SDL_FreeSurface(ghostSurface);
+    maybeThrowRuntimeError(!ghostTexture,
+                           "Error initializing ghost texture: \n" +
                                std::string(SDL_GetError()));
   }
 }
@@ -186,6 +205,19 @@ void pacman::ui::SDLWrapper::renderPacman() {
                    mouthDegreesToTexture(pacman->getMouthDegrees()), NULL,
                    &block, orientationToDegrees(pacman->getOrientation()), NULL,
                    SDL_RendererFlip::SDL_FLIP_NONE);
+}
+
+void pacman::ui::SDLWrapper::renderGhosts() {
+  for (int i = 0; i < ghosts.size(); i++) {
+    long y = ghosts.at(i)->getY(), x = ghosts.at(i)->getX();
+    SDL_Rect block;
+    block.y = y - cellHeight / 2;
+    block.x = x - cellHeight / 2;
+    block.h = cellHeight;
+    block.w = cellWidth;
+    SDL_RenderCopyEx(sdlRenderer, ghostTextures.at(i), NULL, &block, 0, NULL,
+                     SDL_RendererFlip::SDL_FLIP_NONE);
+  }
 }
 
 long pacman::ui::SDLWrapper::orientationToDegrees(
