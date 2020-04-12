@@ -15,6 +15,8 @@ void pacman::Pacman::start() {
   Agent::start();
   while (alive.load()) {
 
+    std::cout << *this << "\n";
+
     // Delay
     std::this_thread::sleep_for(std::chrono::milliseconds(30));
 
@@ -35,7 +37,7 @@ void pacman::Pacman::start() {
     }
 
     // Eat Pellet
-    std::pair<long, long> currentLocation = std::make_pair(y, x);
+    std::pair<long, long> currentLocation = std::make_pair(getY(), getX());
     bool pelletEaten = maze->clearPellet(currentLocation);
     if (pelletEaten) {
       numPelletsEaten++;
@@ -51,26 +53,26 @@ void pacman::Pacman::start() {
       if (maze->isValid(nextDesiredLocation))
       // If pacman can move straight to next desired location, do so.
       {
-        y = nextLocation.first;
-        x = nextLocation.second;
+        y.store(nextLocation.first);
+        x.store(nextLocation.second);
       } else if (maze->isValid(nextCellLocation))
       // Otherwise, move until flush with cell we're currently entering.
       {
-        y = nextCellLocation.first;
-        x = nextCellLocation.second;
+        y.store(nextCellLocation.first);
+        x.store(nextCellLocation.second);
       }
     } else {
       if (maze->isCellAligned(currentLocation)) {
         if (maze->isValid(nextDesiredLocation)) {
           orientation = desiredOrientation;
-          y = nextDesiredLocation.first;
-          x = nextDesiredLocation.second;
+          y.store(nextDesiredLocation.first);
+          x.store(nextDesiredLocation.second);
         } else if (maze->isValid(nextLocation)) {
-          y = nextLocation.first;
-          x = nextLocation.second;
+          y.store(nextLocation.first);
+          x.store(nextLocation.second);
         } else if (maze->isValid(nextCellLocation)) {
-          y = nextCellLocation.first;
-          x = nextCellLocation.second;
+          y.store(nextCellLocation.first);
+          x.store(nextCellLocation.second);
         }
       } else {
         // TODO: Refine, if it jitters when stopping at cells
@@ -78,14 +80,14 @@ void pacman::Pacman::start() {
             maze->distance(currentLocation, nextCellLocation))
         // Not going to reach the next cell location.
         {
-          y = nextLocation.first;
-          x = nextLocation.second;
+          y.store(nextLocation.first);
+          x.store(nextLocation.second);
         } else
         // Not aligned to cell, which means next cell location is definitely
         // valid.
         {
-          y = nextCellLocation.first;
-          x = nextCellLocation.second;
+          y.store(nextCellLocation.first);
+          x.store(nextCellLocation.second);
         }
       }
     }
@@ -119,9 +121,8 @@ void pacman::Pacman::onKeyEvent(int scanCode) {
 }
 
 std::pair<long, long> pacman::Pacman::nextLocation(Orientation orientation) {
-  // long y = this->y, x = this->x;
-  long y = this->y;
-  long x = this->x;
+  long y = getY();
+  long x = getX();
   switch (orientation) {
   case UP:
     y -= velocity;
@@ -141,8 +142,8 @@ std::pair<long, long> pacman::Pacman::nextLocation(Orientation orientation) {
 
 std::pair<long, long>
 pacman::Pacman::nextCellLocation(Orientation orientation) {
-  bool isCellAligned = maze->isCellAligned(std::make_pair(this->y, this->x));
-  long y = this->y, x = this->x;
+  bool isCellAligned = maze->isCellAligned(std::make_pair(getY(), getX()));
+  long y = getY(), x = getX();
   long cellHeight = maze->getCellHeight();
   long halfCellHeight = cellHeight / 2;
   long cellWidth = maze->getCellWidth();

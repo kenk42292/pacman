@@ -14,7 +14,16 @@ pacman::Game::Game(std::string gameConfigFolderPath,
                    std::string imgFolderPath) {
   initMaze(gameConfigFolderPath + "/maze");
   initAgents(gameConfigFolderPath + "/agents");
+  maze->injectAgents(pacman, ghosts);
   initUI(imgFolderPath);
+}
+
+pacman::Game::~Game() {
+  pacman->stop();
+  for (auto iter=ghosts.begin(); iter<ghosts.end(); iter++) {
+    (*iter)->stop();
+  }
+  sdlWrapper->stop();
 }
 
 void pacman::Game::start() {

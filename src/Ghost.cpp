@@ -22,8 +22,8 @@ void pacman::Ghost::start() {
 
     // Calculate which cell to go to next
     long cellHeight = maze->getCellHeight(), cellWidth = maze->getCellWidth();
-    std::pair<int, int> currentCellPosition(this->y / cellHeight,
-                                            this->x / cellWidth);
+    std::pair<int, int> currentCellPosition(getY() / cellHeight,
+                                            getX() / cellWidth);
     std::pair<int, int> pacmanCellPosition(pacman->getY() / cellHeight,
                                            pacman->getX() / cellWidth);
     std::pair<int, int> nextCellPosition = astar(
@@ -35,15 +35,15 @@ void pacman::Ghost::start() {
     // <delta_i, delta_j> should be a one-hot pair.
     long delta_y = delta_i * velocity;
     long delta_x = delta_j * velocity;
-    long y_final = this->y + delta_y;
-    long x_final = this->x + delta_x;
+    long y_final = getY() + delta_y;
+    long x_final = getX() + delta_x;
     std::pair<long, long> loc_final = std::make_pair(y_final, x_final);
     if (maze->isAxisAligned(loc_final))
     // If the move resulted in an alignment with column or row, the move is
     // valid: move that way.
     {
-      this->y = y_final;
-      this->x = x_final;
+      this->y.store(y_final);
+      this->x.store(x_final);
     } else
     // If not axis-aligned, must align to axis first. Move towards center of
     // current cell. Eventually, we'll be cell-aligned. From there, we'll move
@@ -62,8 +62,9 @@ void pacman::Ghost::start() {
       if (std::abs(delta_x) > velocity) {
         delta_x = delta_x < 0 ? -velocity : velocity;
       }
-      this->y += delta_y;
-      this->x += delta_x;
+
+      this->y.store(getY() + delta_y);
+      this->x.store(getX() + delta_x);
     }
   }
 }
@@ -79,9 +80,9 @@ pacman::Ghost::astar(std::pair<int, int> startCell, std::pair<int, int> endCell,
 
   // Pre-create all nodes.
   std::vector<std::vector<Node>> nodes;
-  for (int i=0; i<numRows; i++) {
+  for (int i = 0; i < numRows; i++) {
     std::vector<Node> row;
-    for (int j=0; j<numCols; j++) {
+    for (int j = 0; j < numCols; j++) {
       Node node(i, j);
       node.g_val = LONG_MAX;
       node.f_val = LONG_MAX;
@@ -95,16 +96,16 @@ pacman::Ghost::astar(std::pair<int, int> startCell, std::pair<int, int> endCell,
   // 'index = i*numCols + j
   std::unordered_set<int> closed;
 
-  std::priority_queue<Node*, std::vector<Node*>, NodeComparator> open;
+  std::priority_queue<Node *, std::vector<Node *>, NodeComparator> open;
 
-  Node* startNode = &nodes.at(startCell.first).at(startCell.second);
+  Node *startNode = &nodes.at(startCell.first).at(startCell.second);
   startNode->g_val = 0;
   startNode->f_val = heuristic(startCell, endCell);
   startNode->parent = startNode;
   open.push(startNode);
   while (open.size() > 0) {
     // Grab min. f_val node from heap.
-    Node* current = open.top();
+    Node *current = open.top();
     open.pop();
     closed.insert(current->i * numCols + current->j);
 
@@ -133,12 +134,15 @@ pacman::Ghost::astar(std::pair<int, int> startCell, std::pair<int, int> endCell,
       }
 
       // If candidate isn't possible in possible maze, don't consider it.
-      if (!maze->isCellValid(*candidate)) {
+      // Further, if the planned location overlaps with any agent besides
+      // itself, don't consider it.
+      if (!maze->isCellValid(*candidate) ||
+          maze->isGhostInCell(*candidate)) {
         continue;
       }
 
       // Add neighbor to open set.
-      Node* neighbor = &nodes.at(candidate->first).at(candidate->second);
+      Node *neighbor = &nodes.at(candidate->first).at(candidate->second);
       if (neighbor->g_val > current->g_val + 1) {
         neighbor->g_val = current->g_val + 1;
         neighbor->f_val =

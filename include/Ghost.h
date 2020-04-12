@@ -45,8 +45,12 @@ private:
                             std::function<long(std::pair<int, int> startCell,
                                                std::pair<int, int> endCell)>
                                 heuristic);
+
+  /** A simpel heuristic for A*. May come up with others at some point. */
   static long manhattan_distance(std::pair<int, int> startCell,
                           std::pair<int, int> endCell);
+
+  /** Reference to pacman  */
   std::shared_ptr<Pacman> pacman;
 };
 } // namespace pacman

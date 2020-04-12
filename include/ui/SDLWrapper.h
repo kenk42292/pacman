@@ -20,6 +20,7 @@ public:
     SDLWrapper(std::shared_ptr<Maze> maze, std::shared_ptr<Pacman> pacman, std::vector<std::shared_ptr<Ghost>> ghosts, std::string imgFolderPath);
     ~SDLWrapper();
     void start();
+    void stop();
     void addKeyEventListener(std::shared_ptr<KeyEventListener> listener);
 private:
     SDL_Window* sdlWindow;

@@ -20,6 +20,7 @@ class Ghost;
 class Game {
 public:
     Game(std::string gameConfigFolderPath, std::string imgFolderPath);
+    ~Game();
     const long CELL_WIDTH = 20;
     const long CELL_HEIGHT = 20;
     const std::string PACMAN = "pacman";

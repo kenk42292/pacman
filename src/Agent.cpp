@@ -13,11 +13,11 @@ void pacman::Agent::stop() {
 }
 
 long pacman::Agent::getY() const {
-    return y;
+    return y.load();
 }
 
 long pacman::Agent::getX() const {
-    return x;
+    return x.load();
 }
 
 long pacman::Agent::getVelocity() const {

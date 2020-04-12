@@ -18,8 +18,8 @@ public:
     long getVelocity() const;
     std::atomic_bool alive;
 protected:
-    long y; // y-value of the CENTER of the agent
-    long x; // x-value of the CENTER of the agent
+    std::atomic_long y;
+    std::atomic_long x;
     long velocity;
     std::shared_ptr<Maze> maze;
 };

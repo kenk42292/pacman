@@ -73,6 +73,10 @@ void pacman::ui::SDLWrapper::start() {
   }
 }
 
+void pacman::ui::SDLWrapper::stop() {
+  quit = true;
+}
+
 void pacman::ui::SDLWrapper::addKeyEventListener(
     std::shared_ptr<KeyEventListener> listener) {
   keyEventListeners.push_back(listener);
