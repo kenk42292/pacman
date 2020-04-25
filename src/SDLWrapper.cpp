@@ -8,30 +8,28 @@
 #include <thread>
 #include <vector>
 
-#include "../../include/Ghost.h"
-#include "../../include/Pacman.h"
-#include "../../include/ui/KeyEventListener.h"
-#include "../../include/ui/SDLWrapper.h"
+#include "../include/Ghost.h"
+#include "../include/Pacman.h"
+#include "../include/SDLWrapper.h"
 
-pacman::ui::SDLWrapper::SDLWrapper(std::shared_ptr<Maze> maze,
-                                   std::shared_ptr<Pacman> pacman,
-                                   std::vector<std::shared_ptr<Ghost>> ghosts,
+pacman::SDLWrapper::SDLWrapper(std::weak_ptr<Maze> maze_ptr,
+                                   std::weak_ptr<Pacman> pacman_ptr,
+                                   std::weak_ptr<std::vector<Ghost>> ghosts_ptr,
                                    std::string imgFolderPath)
-    : mazeMatrix(maze->getMazeMatrix()), pacman(pacman), ghosts(ghosts),
-      cellHeight(maze->getCellHeight()), cellWidth(maze->getCellWidth()),
-      numRows(maze->getMazeMatrix()->size()),
-      numCols(maze->getMazeMatrix()->begin()->size()),
-      imgFolderPath(imgFolderPath) {
+    : pacman(pacman), ghosts(ghosts), imgFolderPath(imgFolderPath) {
+  auto maze = maze_ptr.lock();
+  mazeMatrix = maze->getMazeMatrix();
+  cellHeight = maze->getCellHeight();
+  cellWidth = maze->getCellWidth();
+  numRows = maze->getMazeMatrix().lock()->size();
+  numCols = maze->getMazeMatrix().lock()->begin()->size();
   initSDL();
   initWindow();
   initRenderer();
   initTextures();
-  // SDL_UpdateWindowSurface(sdlWindow);
-  std::cout << "numRows: " << numRows << '\n';
-  std::cout << "numCols: " << numCols << '\n';
 }
 
-pacman::ui::SDLWrapper::~SDLWrapper() {
+pacman::SDLWrapper::~SDLWrapper() {
   SDL_DestroyTexture(pelletTexture);
   for (auto iter = pacmanTextures.begin(); iter < pacmanTextures.end();
        iter++) {
@@ -42,25 +40,24 @@ pacman::ui::SDLWrapper::~SDLWrapper() {
   SDL_Quit();
 }
 
-void pacman::ui::SDLWrapper::start() {
+void pacman::SDLWrapper::start() {
 
   while (!quit) {
-    // std::cout << "sdlWrapper thread: " << std::this_thread::get_id() << "\n";
-    // std::this_thread::sleep_for(std::chrono::seconds(1));
     // process events until event queue is empty.
     while (SDL_PollEvent(&e) != 0) {
       if (e.type == SDL_QUIT) {
         quit = true;
-        pacman->stop();
+        pacman.lock()->stop();
       } else if (e.type == SDL_KEYDOWN) {
         if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
           quit = true;
-          pacman->stop();
-          for (auto ghost = ghosts.begin(); ghost < ghosts.end(); ghost++) {
-            (*ghost)->stop();
+          pacman.lock()->stop();
+          auto ghosts_ptr = ghosts.lock();
+          for (auto ghost_iter = ghosts_ptr->begin(); ghost_iter < ghosts_ptr->end(); ghost_iter++) {
+            ghost_iter->stop();
           }
         } else {
-          notifyKeyEventListeners(e.key.keysym.scancode);
+          pacman.lock()->onKeyEvent(e.key.keysym.scancode);
         }
       }
     }
@@ -73,16 +70,9 @@ void pacman::ui::SDLWrapper::start() {
   }
 }
 
-void pacman::ui::SDLWrapper::stop() {
-  quit = true;
-}
+void pacman::SDLWrapper::stop() { quit = true; }
 
-void pacman::ui::SDLWrapper::addKeyEventListener(
-    std::shared_ptr<KeyEventListener> listener) {
-  keyEventListeners.push_back(listener);
-}
-
-void pacman::ui::SDLWrapper::initSDL() {
+void pacman::SDLWrapper::initSDL() {
   maybeThrowRuntimeError(SDL_Init(SDL_INIT_VIDEO) != 0,
                          "Error initializing SDL: \n" +
                              std::string(SDL_GetError()));
@@ -92,7 +82,7 @@ void pacman::ui::SDLWrapper::initSDL() {
                              std::string(IMG_GetError()));
 }
 
-void pacman::ui::SDLWrapper::initWindow() {
+void pacman::SDLWrapper::initWindow() {
   sdlWindow = SDL_CreateWindow("Pac that man!", SDL_WINDOWPOS_CENTERED,
                                SDL_WINDOWPOS_CENTERED, cellWidth * numCols,
                                cellHeight * numRows, SDL_WINDOW_SHOWN);
@@ -100,14 +90,14 @@ void pacman::ui::SDLWrapper::initWindow() {
                                          std::string(SDL_GetError()));
 }
 
-void pacman::ui::SDLWrapper::initRenderer() {
+void pacman::SDLWrapper::initRenderer() {
   Uint32 render_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
   sdlRenderer = SDL_CreateRenderer(sdlWindow, -1, render_flags);
   maybeThrowRuntimeError(!sdlRenderer, "Error initializing SDL renderer: \n" +
                                            std::string(SDL_GetError()));
 }
 
-void pacman::ui::SDLWrapper::initTextures() {
+void pacman::SDLWrapper::initTextures() {
   // Window Texture
   SDL_Surface *sdlSurface = SDL_GetWindowSurface(sdlWindow);
   maybeThrowRuntimeError(!sdlSurface,
@@ -167,7 +157,7 @@ void pacman::ui::SDLWrapper::initTextures() {
   }
 }
 
-void pacman::ui::SDLWrapper::renderMaze() {
+void pacman::SDLWrapper::renderMaze() {
 
   for (int i = 0; i < numRows; i++) {
     for (int j = 0; j < numCols; j++) {
@@ -176,7 +166,7 @@ void pacman::ui::SDLWrapper::renderMaze() {
       block.x = j * cellWidth;
       block.h = cellHeight;
       block.w = cellWidth;
-      switch (mazeMatrix->at(i).at(j)) {
+      switch (mazeMatrix.lock()->at(i).at(j)) {
       case Maze::Cell::kBorder:
         SDL_SetRenderDrawColor(sdlRenderer, 0x00, 0x00, 0x00, 0xFF);
         SDL_RenderFillRect(sdlRenderer, &block);
@@ -194,8 +184,9 @@ void pacman::ui::SDLWrapper::renderMaze() {
   }
 }
 
-void pacman::ui::SDLWrapper::renderPacman() {
-  long y = pacman->getY(), x = pacman->getX();
+void pacman::SDLWrapper::renderPacman() {
+  auto pacman_shared = pacman.lock();
+  long y = pacman_shared->getY(), x = pacman_shared->getX();
 
   SDL_Rect block;
   block.y = y - cellHeight / 2;
@@ -203,17 +194,18 @@ void pacman::ui::SDLWrapper::renderPacman() {
   block.h = cellHeight;
   block.w = cellWidth;
   long mouthDegrees =
-      pacman
+      pacman_shared
           ->getMouthDegrees(); // TODO: Make this thread-safe. Just atomic_long
   SDL_RenderCopyEx(sdlRenderer,
-                   mouthDegreesToTexture(pacman->getMouthDegrees()), NULL,
-                   &block, orientationToDegrees(pacman->getOrientation()), NULL,
+                   mouthDegreesToTexture(pacman_shared->getMouthDegrees()), NULL,
+                   &block, orientationToDegrees(pacman_shared->getOrientation()), NULL,
                    SDL_RendererFlip::SDL_FLIP_NONE);
 }
 
-void pacman::ui::SDLWrapper::renderGhosts() {
-  for (int i = 0; i < ghosts.size(); i++) {
-    long y = ghosts.at(i)->getY(), x = ghosts.at(i)->getX();
+void pacman::SDLWrapper::renderGhosts() {
+  auto ghosts_shared = ghosts.lock();
+  for (int i = 0; i < ghosts_shared->size(); i++) {
+    long y = ghosts_shared->at(i).getY(), x = ghosts_shared->at(i).getX();
     SDL_Rect block;
     block.y = y - cellHeight / 2;
     block.x = x - cellHeight / 2;
@@ -224,7 +216,7 @@ void pacman::ui::SDLWrapper::renderGhosts() {
   }
 }
 
-long pacman::ui::SDLWrapper::orientationToDegrees(
+long pacman::SDLWrapper::orientationToDegrees(
     Pacman::Orientation orientation) {
   switch (orientation) {
   case Pacman::Orientation::UP:
@@ -238,7 +230,7 @@ long pacman::ui::SDLWrapper::orientationToDegrees(
   }
 }
 
-SDL_Texture *pacman::ui::SDLWrapper::mouthDegreesToTexture(long mouthDegrees) {
+SDL_Texture *pacman::SDLWrapper::mouthDegreesToTexture(long mouthDegrees) {
   if (mouthDegrees < 24) {
     return pacmanTextures.at(0);
   } else if (mouthDegrees < 48) {
@@ -252,19 +244,11 @@ SDL_Texture *pacman::ui::SDLWrapper::mouthDegreesToTexture(long mouthDegrees) {
   }
 }
 
-void pacman::ui::SDLWrapper::notifyKeyEventListeners(int scanCode) {
-  for (std::vector<std::shared_ptr<pacman::ui::KeyEventListener>>::iterator
-           iter = keyEventListeners.begin();
-       iter < keyEventListeners.end(); iter++) {
-    iter->get()->onKeyEvent(scanCode);
-  }
-}
-
-std::string pacman::ui::SDLWrapper::getPacmanImage() {
+std::string pacman::SDLWrapper::getPacmanImage() {
   return "/pacman-agent-2.png";
 }
 
-void pacman::ui::SDLWrapper::maybeThrowRuntimeError(bool throwError,
+void pacman::SDLWrapper::maybeThrowRuntimeError(bool throwError,
                                                     std::string message) {
   if (throwError) {
     std::cout << message << '\n';
@@ -272,7 +256,7 @@ void pacman::ui::SDLWrapper::maybeThrowRuntimeError(bool throwError,
   }
 }
 
-void pacman::ui::SDLWrapper::SDLWrapper::scale(SDL_Rect &rect, float scale) {
+void pacman::SDLWrapper::SDLWrapper::scale(SDL_Rect &rect, float scale) {
   long height = static_cast<long>(rect.h * scale);
   long width = static_cast<long>(rect.w * scale);
   rect.y += rect.h / 2 - height / 2;

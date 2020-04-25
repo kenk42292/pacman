@@ -7,15 +7,13 @@
 #include "../include/Maze.h"
 #include "../include/Pacman.h"
 
-pacman::Pacman::Pacman(long y, long x, std::shared_ptr<Maze> maze)
+pacman::Pacman::Pacman(long y, long x, std::weak_ptr<Maze> maze)
     : Agent(y, x, PACMAN_VELOCITY, maze), orientation(UP),
       desiredOrientation(UP), mouthDegrees(0), mouthDirection(OPENING) {}
 
 void pacman::Pacman::start() {
   Agent::start();
   while (alive.load()) {
-
-    std::cout << *this << "\n";
 
     // Delay
     std::this_thread::sleep_for(std::chrono::milliseconds(30));

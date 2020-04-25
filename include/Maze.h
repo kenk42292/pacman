@@ -15,11 +15,10 @@ public:
   enum Cell { kEmpty, kPellet, kBorder };
   
   /** Creates a maze with internal maze matrix representation, with specified cell dimensions. */
-  Maze(std::shared_ptr<std::vector<std::vector<Cell>>> mazeMatrix,
-       long cellHeight, long cellWidth);
+  Maze(std::string mazeFilePathx, long cellHeight, long cellWidth);
 
   /** Gives agent references to maze. */
-  void injectAgents(std::shared_ptr<Pacman> pacman, std::vector<std::shared_ptr<Ghost>> ghosts);
+  void injectAgents(std::weak_ptr<Pacman> pacman, std::weak_ptr<std::vector<Ghost>> ghosts);
 
   /** Returns whether the given location (in pixels) is a valid place for an agent to be centered on. */
   bool isValid(std::pair<long, long> location);
@@ -41,16 +40,23 @@ public:
   /** Returns the number of ghosts that overlap with a location. */
   bool isGhostInCell(std::pair<long, long> location);
 
+  /** Reads the maze matrix from the given file. */
+  std::shared_ptr<std::vector<std::vector<Maze::Cell>>> readMazeMatrix(std::string mazeFilePath);
+
+  /** Utility for reading maze matrix. */
+  Maze::Cell charToCell(char & c);
+
   // Getters and Setters.
-  std::shared_ptr<Pacman> getPacman();
-  std::vector<std::shared_ptr<Ghost>> getGhosts();
+  std::weak_ptr<Pacman> getPacman();
+  std::vector<std::weak_ptr<Ghost>> getGhosts();
   long getCellHeight();
   long getCellWidth();
-  std::shared_ptr<std::vector<std::vector<Cell>>> getMazeMatrix();
+  std::weak_ptr<std::vector<std::vector<Cell>>> getMazeMatrix();
+  
 private:
-  std::shared_ptr<std::vector<std::vector<Cell>>> mazeMatrix;
-  std::shared_ptr<Pacman> pacman;
-  std::vector<std::shared_ptr<Ghost>> ghosts;
+  std::weak_ptr<std::vector<std::vector<Cell>>> mazeMatrix;
+  std::weak_ptr<Pacman> pacman;
+  std::weak_ptr<std::vector<Ghost>> ghosts;
   long cellHeight;
   long cellWidth;
 };

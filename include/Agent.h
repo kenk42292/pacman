@@ -10,7 +10,7 @@ class Maze;
 
 class Agent {
 public:
-    Agent(long y, long x, long velocity, std::shared_ptr<Maze>);
+    Agent(long y, long x, long velocity, std::weak_ptr<Maze>);
     void start();
     void stop();
     long getY() const;
@@ -21,7 +21,7 @@ protected:
     std::atomic_long y;
     std::atomic_long x;
     long velocity;
-    std::shared_ptr<Maze> maze;
+    std::weak_ptr<Maze> maze;
 };
 
 } // pacman

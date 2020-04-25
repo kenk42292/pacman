@@ -7,9 +7,8 @@
 #include "../include/Maze.h"
 #include "../include/Pacman.h"
 
-pacman::Maze::Maze(std::shared_ptr<std::vector<std::vector<Cell>>> mazeMatrix,
-                   long cellHeight, long cellWidth)
-    : mazeMatrix(mazeMatrix), cellHeight(cellHeight), cellWidth(cellWidth) {}
+pacman::Maze::Maze(std::string mazeFilePath, long cellHeight, long cellWidth)
+    : mazeMatrix(readMazeMatrix(mazeFilePath)), cellHeight(cellHeight), cellWidth(cellWidth) {}
 
 long pacman::Maze::getCellHeight() { return cellHeight; }
 
@@ -21,7 +20,7 @@ pacman::Maze::getMazeMatrix() {
 }
 
 void pacman::Maze::injectAgents(std::shared_ptr<Pacman> pacman,
-                                std::vector<std::shared_ptr<Ghost>> ghosts) {
+                                std::weak_ptr<std::vector<Ghost>> ghosts) {
   this->pacman = pacman;
   this->ghosts = ghosts;
 }
@@ -60,10 +59,10 @@ bool pacman::Maze::isAxisAligned(std::pair<long, long> location) {
 }
 
 bool pacman::Maze::isGhostInCell(std::pair<long, long> coordinates) {
-  for (auto iter = ghosts.begin(); iter < ghosts.end(); iter++) {
-      std::shared_ptr<Ghost> ghost = *iter;
-      int i = ghost->getY()/cellHeight;
-      int j = ghost->getX()/cellWidth;
+    std::shared_ptr<std::vector<Ghost>> ghosts_shared_ptr = ghosts.lock();
+  for (auto ghost_iter = ghosts_shared_ptr->begin(); ghost_iter < ghosts_shared_ptr->end(); ghost_iter++) {
+      int i = ghost_iter->getY()/cellHeight;
+      int j = ghost_iter->getX()/cellWidth;
       if (i == coordinates.first && j == coordinates.second) {
           return true;
       }
@@ -83,4 +82,50 @@ bool pacman::Maze::clearPellet(std::pair<long, long> agentCenter) {
     return true;
   }
   return false;
+}
+
+std::shared_ptr<std::vector<std::vector<pacman::Maze::Cell>>>
+pacman::Maze::readMazeMatrix(std::string mazeFilePath) {
+
+  std::ifstream inputFileStream(mazeFilePath);
+  if (!inputFileStream.is_open()) {
+    std::cout << "Failed to read in input file[" << mazeFilePath << "]" << '\n';
+    exit(1);
+  }
+
+  auto mazeMatrix = std::make_shared<std::vector<std::vector<Maze::Cell>>>();
+
+  std::string line;
+  while (std::getline(inputFileStream, line)) {
+    std::vector<Maze::Cell> row;
+    for (auto it = line.begin(); it != line.end(); ++it) {
+      row.push_back(charToCell(*it));
+    }
+
+    mazeMatrix->push_back(row);
+  }
+
+  inputFileStream.close();
+
+  return mazeMatrix;
+}
+
+pacman::Maze::Cell pacman::Maze::charToCell(char &c) {
+  switch (c) {
+  case '|':
+  case '+':
+  case '-':
+  case '_':
+  case 'x':
+    return Maze::Cell::kBorder;
+  case '.':
+    return Maze::Cell::kPellet;
+  case ' ':
+    return Maze::Cell::kEmpty;
+  default:
+    std::cout << "Invalid char[" << std::string(1, c)
+              << "] to be converted to cell." << '\n';
+    throw std::invalid_argument("Invalid char[" + std::string(1, c) +
+                                "] to be converted to cell.");
+  }
 }

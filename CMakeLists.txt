@@ -16,7 +16,7 @@ message("Found package SDL2: ${SDL2_FOUND}")
 find_package(SDL2_image REQUIRED)
 message("Found package SDL2_image: ${SDL2_image_FOUND}")
 
-add_executable(pacman src/main.cpp src/ui/SDLWrapper.cpp src/Game.cpp src/Maze.cpp src/Agent.cpp src/Pacman.cpp src/Ghost.cpp)
+add_executable(pacman src/main.cpp src/SDLWrapper.cpp src/Game.cpp src/Maze.cpp src/Agent.cpp src/Pacman.cpp src/Ghost.cpp)
 string(STRIP ${SDL2_LIBRARIES} SDL2_LIBRARIES)
 string(STRIP ${SDL2_IMAGE_LIBRARIES} SDL2_IMAGE_LIBRARIES)
 target_link_libraries(pacman ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} -lpthread)

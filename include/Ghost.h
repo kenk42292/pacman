@@ -15,8 +15,8 @@ public:
   static const long GHOST_VELOCITY =
       2; // same as pacman. However, ghosts are slower anyway, because of A*
          // search latency.
-  Ghost(long y, long x, std::shared_ptr<Maze> maze,
-        std::shared_ptr<Pacman> pacman);
+  Ghost(long y, long x, std::weak_ptr<Maze> maze,
+        std::weak_ptr<Pacman> pacman);
   void start();
   friend std::ostream &operator<<(std::ostream &outputStream,
                                   const pacman::Ghost &ghost);
@@ -51,7 +51,7 @@ private:
                           std::pair<int, int> endCell);
 
   /** Reference to pacman  */
-  std::shared_ptr<Pacman> pacman;
+  std::weak_ptr<Pacman> pacman;
 };
 } // namespace pacman
 

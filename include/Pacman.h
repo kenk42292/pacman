@@ -6,26 +6,22 @@
 #include <memory>
 
 #include "Agent.h"
-#include "ui/KeyEventListener.h"
 
 namespace pacman {
 
 class Maze;
-namespace ui {
-  class KeyEventListener;
-}
 
-class Pacman : public ui::KeyEventListener, public Agent {
+class Pacman : public Agent {
 public:
   enum Orientation { UP, DOWN, LEFT, RIGHT };
   enum MouthDirection {OPENING, CLOSING};
 
   static const long PACMAN_VELOCITY = 3;
-  Pacman(long y, long x, std::shared_ptr<Maze> maze);
+  Pacman(long y, long x, std::weak_ptr<Maze> maze);
   void start();
   long getMouthDegrees();
   Orientation getOrientation();
-  void onKeyEvent(int scanCode) override;
+  void onKeyEvent(int scanCode);
   friend std::ostream &operator<<(std::ostream &outputStream,
                                   const Pacman &pacman);
 

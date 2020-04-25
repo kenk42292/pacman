@@ -8,6 +8,5 @@ int main(void)
     std::string imgFolderPath = "/home/ken/udacity/pacman/res/img";
     pacman::Game game(gameConfigFolderPath, imgFolderPath);
     game.start();
-
     return 0;
 }

@@ -8,14 +8,13 @@
 #include "../include/Maze.h"
 #include "../include/Pacman.h"
 
-pacman::Ghost::Ghost(long y, long x, std::shared_ptr<Maze> maze,
-                     std::shared_ptr<Pacman> pacman)
+pacman::Ghost::Ghost(long y, long x, std::weak_ptr<Maze> maze,
+                     std::weak_ptr<Pacman> pacman)
     : Agent(y, x, GHOST_VELOCITY, maze), pacman(pacman) {}
 
 void pacman::Ghost::start() {
   Agent::start();
   while (alive.load()) {
-    std::cout << *this << '\n';
 
     // Delay
     std::this_thread::sleep_for(std::chrono::milliseconds(30));
@@ -76,7 +75,7 @@ pacman::Ghost::astar(std::pair<int, int> startCell, std::pair<int, int> endCell,
                          heuristic) {
 
   int numRows = maze->getMazeMatrix()->size();
-  int numCols = maze->getMazeMatrix()->at(0).size();
+  int numCols = maze->getMazeMatrix()->begin()->size();
 
   // Pre-create all nodes.
   std::vector<std::vector<Node>> nodes;
