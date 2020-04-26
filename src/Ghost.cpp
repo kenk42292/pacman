@@ -4,9 +4,11 @@
 #include <iostream>
 #include <thread>
 
+#include "../include/Game.h"
 #include "../include/Ghost.h"
 #include "../include/Maze.h"
 #include "../include/Pacman.h"
+#include "../include/Utils.h"
 
 pacman::Ghost::Ghost(long y, long x, std::weak_ptr<Maze> maze_weak_ptr,
                      std::weak_ptr<Pacman> pacman_weak_ptr,
@@ -68,6 +70,12 @@ void pacman::Ghost::start() {
 
       this->y.store(getY() + delta_y);
       this->x.store(getX() + delta_x);
+    }
+
+    // Check if we're overlapping with Pacman. If so, declare end of game.
+    long distanceToPacman = Utils::distance(std::make_pair(this->getY(), this->getX()), std::make_pair(pacman->getY(), pacman->getX()));
+    if (distanceToPacman < std::min(cellHeight, cellWidth) / 2) {
+      game_weak_ptr.lock()->stop("Ghosts win!");
     }
   }
 }
