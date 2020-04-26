@@ -19,9 +19,15 @@ class Ghost;
  * components shared_ptr. Other components should reference each other via
  * weak_ptr, if necessary.
  */
-class Game {
+class Game : public std::enable_shared_from_this<Game> {
 public:
-  Game(std::string gameConfigFolderPath, std::string imgFolderPath);
+  /** A static factory method to create a game. */
+  template <typename... T>
+  static std::shared_ptr<pacman::Game> create(T &&... t) {
+    auto shared_ptr = std::shared_ptr<Game>(new Game(std::forward<T>(t)...));
+    shared_ptr->initialize();
+    return shared_ptr;
+  }
 
   // Some hard-coded cell-width and cell-heights.
   const long CELL_WIDTH = 20;
@@ -39,6 +45,12 @@ public:
   void stop(std::string message);
 
 private:
+  // Constructor is private. Must use factory method to create.
+  Game(std::string gameConfigFolderPath, std::string imgFolderPath);
+  void initialize();
+  std::string gameConfigFolderPath;
+  std::string imgFolderPath;
+
   // The major components of the game that Game owns.
   std::shared_ptr<Maze> maze;
   std::shared_ptr<Pacman> pacman;
@@ -55,8 +67,12 @@ private:
   parseIndicesByPrefix(std::string agentsConfigPath, std::string agent);
   long indexToLocation(int index, long scale);
 
-  // Helper to get vector of weak_ptrs from vector of shared_ptrs, to share reference of ghosts.
+  // Helper to get vector of weak_ptrs from vector of shared_ptrs, to share
+  // reference of ghosts.
   std::vector<std::weak_ptr<Ghost>> getGhostsWeakPointers();
+
+  // Whether the game is running or not.
+  std::atomic_bool running;
 };
 
 } // namespace pacman

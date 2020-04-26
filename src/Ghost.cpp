@@ -9,8 +9,10 @@
 #include "../include/Pacman.h"
 
 pacman::Ghost::Ghost(long y, long x, std::weak_ptr<Maze> maze_weak_ptr,
-                     std::weak_ptr<Pacman> pacman_weak_ptr)
-    : Agent(y, x, GHOST_VELOCITY, maze_weak_ptr), pacman_weak_ptr(pacman_weak_ptr) {}
+                     std::weak_ptr<Pacman> pacman_weak_ptr,
+                     std::weak_ptr<Game> game_weak_ptr)
+    : Agent(y, x, GHOST_VELOCITY, maze_weak_ptr),
+      pacman_weak_ptr(pacman_weak_ptr), game_weak_ptr(game_weak_ptr) {}
 
 void pacman::Ghost::start() {
   Agent::start();

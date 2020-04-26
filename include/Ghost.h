@@ -7,6 +7,7 @@
 
 namespace pacman {
 
+class Game;
 class Pacman;
 
 class Ghost : public Agent {
@@ -14,7 +15,8 @@ class Ghost : public Agent {
 public:
   static const long GHOST_VELOCITY = 2;
   Ghost(long y, long x, std::weak_ptr<Maze> maze,
-        std::weak_ptr<Pacman> pacman);
+        std::weak_ptr<Pacman> pacman_weak_ptr,
+        std::weak_ptr<Game> game_weak_ptr);
   void start();
   friend std::ostream &operator<<(std::ostream &outputStream,
                                   const pacman::Ghost &ghost);
@@ -44,12 +46,15 @@ private:
                                                std::pair<int, int> endCell)>
                                 heuristic);
 
-  /** A simpel heuristic for A*. May come up with others at some point. */
+  /** A simple heuristic for A*. May come up with others at some point. */
   static long manhattan_distance(std::pair<int, int> startCell,
                           std::pair<int, int> endCell);
 
-  /** Reference to pacman  */
+  /** Reference to pacman.  */
   std::weak_ptr<Pacman> pacman_weak_ptr;
+  
+  /** Reference to the game. When this ghost captures Pacman, stop the game. */
+  std::weak_ptr<Game> game_weak_ptr;
 };
 } // namespace pacman
 

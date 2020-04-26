@@ -8,6 +8,7 @@
 #include <thread>
 #include <vector>
 
+#include "../include/Game.h"
 #include "../include/Ghost.h"
 #include "../include/Pacman.h"
 #include "../include/SDLWrapper.h"
@@ -15,8 +16,10 @@
 pacman::SDLWrapper::SDLWrapper(std::weak_ptr<Maze> maze_ptr,
                                std::weak_ptr<Pacman> pacman_weak_ptr,
                                std::vector<std::weak_ptr<Ghost>> ghosts,
-                               std::string imgFolderPath)
-    : pacman_weak_ptr(pacman_weak_ptr), ghosts(ghosts), imgFolderPath(imgFolderPath) {
+                               std::string imgFolderPath,
+                               std::weak_ptr<Game> game_weak_ptr)
+    : pacman_weak_ptr(pacman_weak_ptr), ghosts(ghosts),
+      imgFolderPath(imgFolderPath), game_weak_ptr(game_weak_ptr) {
   auto maze = maze_ptr.lock();
   mazeMatrix = maze->getMazeMatrix();
   cellHeight = maze->getCellHeight();
@@ -40,37 +43,36 @@ pacman::SDLWrapper::~SDLWrapper() {
   SDL_Quit();
 }
 
-void pacman::SDLWrapper::start() {
+void pacman::SDLWrapper::processInputEvents() {
 
-  while (!quit) {
-    // process events until event queue is empty.
-    while (SDL_PollEvent(&e) != 0) {
-      if (e.type == SDL_QUIT) {
-        quit = true;
+  // process events until event queue is empty.
+  while (SDL_PollEvent(&e) != 0) {
+    if (e.type == SDL_QUIT) {
+      game_weak_ptr.lock()->stop("Quitting due to user input.");
+      pacman_weak_ptr.lock()->stop();
+    } else if (e.type == SDL_KEYDOWN) {
+      if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+        game_weak_ptr.lock()->stop("Quitting due to user input.");
         pacman_weak_ptr.lock()->stop();
-      } else if (e.type == SDL_KEYDOWN) {
-        if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
-          quit = true;
-          pacman_weak_ptr.lock()->stop();
-          for (auto ghost_iter = ghosts.begin(); ghost_iter < ghosts.end();
-               ghost_iter++) {
-            (*ghost_iter).lock()->stop();
-          }
-        } else {
-          pacman_weak_ptr.lock()->onKeyEvent(e.key.keysym.scancode);
+        for (auto ghost_iter = ghosts.begin(); ghost_iter < ghosts.end();
+             ghost_iter++) {
+          (*ghost_iter).lock()->stop();
         }
+      } else {
+        pacman_weak_ptr.lock()->onKeyEvent(e.key.keysym.scancode);
       }
     }
-    SDL_SetRenderDrawColor(sdlRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    SDL_RenderClear(sdlRenderer);
-    renderMaze();
-    renderPacman();
-    renderGhosts();
-    SDL_RenderPresent(sdlRenderer);
   }
 }
 
-void pacman::SDLWrapper::stop() { quit = true; }
+void pacman::SDLWrapper::render() {
+  SDL_SetRenderDrawColor(sdlRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+  SDL_RenderClear(sdlRenderer);
+  renderMaze();
+  renderPacman();
+  renderGhosts();
+  SDL_RenderPresent(sdlRenderer);
+}
 
 void pacman::SDLWrapper::initSDL() {
   maybeThrowRuntimeError(SDL_Init(SDL_INIT_VIDEO) != 0,

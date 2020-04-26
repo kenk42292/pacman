@@ -4,12 +4,15 @@
 #include <iostream>
 #include <thread>
 
+#include "../include/Game.h"
 #include "../include/Maze.h"
 #include "../include/Pacman.h"
 
-pacman::Pacman::Pacman(long y, long x, std::weak_ptr<Maze> maze)
-    : Agent(y, x, PACMAN_VELOCITY, maze), orientation(UP),
-      desiredOrientation(UP), mouthDegrees(0), mouthDirection(OPENING) {}
+pacman::Pacman::Pacman(long y, long x, std::weak_ptr<Maze> maze_weak_ptr,
+                       std::weak_ptr<Game> game_weak_ptr)
+    : Agent(y, x, PACMAN_VELOCITY, maze_weak_ptr),
+      game_weak_ptr(game_weak_ptr), orientation(UP), desiredOrientation(UP),
+      mouthDegrees(0), mouthDirection(OPENING) {}
 
 void pacman::Pacman::start() {
   Agent::start();

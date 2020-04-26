@@ -37,7 +37,7 @@ public:
   /** Removes a pellet from the maze, if the agent overlaps with it. */
   bool clearPellet(std::pair<long, long> agentCenter);
 
-  /** Returns the number of ghosts that overlap with a location. */
+  /** Returns true if a ghost exists in the given location's cell. */
   bool isGhostInCell(std::pair<long, long> location);
 
   /** Reads the maze matrix from the given file. */

@@ -9,6 +9,7 @@
 
 namespace pacman {
 
+class Game;
 class Maze;
 
 class Pacman : public Agent {
@@ -17,7 +18,7 @@ public:
   enum MouthDirection {OPENING, CLOSING};
 
   static const long PACMAN_VELOCITY = 3;
-  Pacman(long y, long x, std::weak_ptr<Maze> maze);
+  Pacman(long y, long x, std::weak_ptr<Maze> maze_weak_ptr, std::weak_ptr<Game> game_weak_ptr);
   void start();
   long getMouthDegrees();
   Orientation getOrientation();
@@ -26,6 +27,7 @@ public:
                                   const Pacman &pacman);
 
 private:
+  std::weak_ptr<Game> game_weak_ptr;
   Orientation orientation;
   Orientation desiredOrientation;
   std::atomic_long mouthDegrees;

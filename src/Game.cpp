@@ -10,8 +10,10 @@
 #include "../include/Pacman.h"
 #include "../include/SDLWrapper.h"
 
-pacman::Game::Game(std::string gameConfigFolderPath,
-                   std::string imgFolderPath) {
+pacman::Game::Game(std::string gameConfigFolderPath, std::string imgFolderPath)
+    : gameConfigFolderPath(gameConfigFolderPath), imgFolderPath(imgFolderPath) {}
+
+void pacman::Game::initialize() {
   initMaze(gameConfigFolderPath + "/maze");
   initAgents(gameConfigFolderPath + "/agents");
   maze->injectAgents(pacman, getGhostsWeakPointers());
@@ -19,21 +21,30 @@ pacman::Game::Game(std::string gameConfigFolderPath,
 }
 
 void pacman::Game::start() {
+
+  // Game Logic in the background.
   auto pacmanFuture =
       std::async(std::launch::async, [this]() { pacman->start(); });
 
   std::vector<std::future<void>> ghostFutures;
   for (auto ghost_iter = ghosts.begin(); ghost_iter < ghosts.end();
        ghost_iter++) {
-    ghostFutures.push_back(std::async(std::launch::async,
-                                      [ghost_iter]() { (*ghost_iter)->start(); }));
+    ghostFutures.push_back(std::async(
+        std::launch::async, [ghost_iter]() { (*ghost_iter)->start(); }));
   }
 
-  sdlWrapper->start();
+  // Start Game Loop.
+  running = true;
+  while (running) {
+    sdlWrapper->processInputEvents();
+    sdlWrapper->render();
+  }
 }
 
 void pacman::Game::stop(std::string message) {
   std::cout << message << "\n";
+
+  running = false;
 
   pacman->stop();
 
@@ -41,8 +52,6 @@ void pacman::Game::stop(std::string message) {
        ghost_iter++) {
     (*ghost_iter)->stop();
   }
-
-  sdlWrapper->stop();
 }
 
 void pacman::Game::initMaze(std::string mazeConfigPath) {
@@ -59,19 +68,19 @@ void pacman::Game::initAgents(std::string agentsConfigPath) {
   auto pacmanIndeces = pacmanIndicesVector.at(0);
   y = indexToLocation(pacmanIndeces.first, CELL_HEIGHT);
   x = indexToLocation(pacmanIndeces.second, CELL_WIDTH);
-  pacman = std::make_shared<Pacman>(y, x, maze);
+  pacman = std::make_shared<Pacman>(y, x, maze, shared_from_this());
 
   auto ghostIndicesVector = parseIndicesByPrefix(agentsConfigPath, GHOST);
   for (auto ghostIndices : ghostIndicesVector) {
     y = indexToLocation(ghostIndices.first, CELL_HEIGHT);
     x = indexToLocation(ghostIndices.second, CELL_WIDTH);
-    ghosts.push_back(std::make_shared<Ghost>(y, x, maze, pacman));
+    ghosts.push_back(std::make_shared<Ghost>(y, x, maze, pacman, shared_from_this()));
   }
 }
 
 void pacman::Game::initUI(std::string imgFolderPath) {
-  sdlWrapper =
-      std::make_unique<SDLWrapper>(maze, pacman, getGhostsWeakPointers(), imgFolderPath);
+  sdlWrapper = std::make_unique<SDLWrapper>(
+      maze, pacman, getGhostsWeakPointers(), imgFolderPath, shared_from_this());
 }
 
 std::vector<std::pair<int, int>>
@@ -110,9 +119,11 @@ long pacman::Game::indexToLocation(int index, long scale) {
   return index * scale + scale / 2;
 }
 
-std::vector<std::weak_ptr<pacman::Ghost>> pacman::Game::getGhostsWeakPointers() {
+std::vector<std::weak_ptr<pacman::Ghost>>
+pacman::Game::getGhostsWeakPointers() {
   std::vector<std::weak_ptr<Ghost>> weakPointers;
-  for (auto ghost_iter = ghosts.begin(); ghost_iter < ghosts.end(); ghost_iter++) {
+  for (auto ghost_iter = ghosts.begin(); ghost_iter < ghosts.end();
+       ghost_iter++) {
     weakPointers.push_back((*ghost_iter));
   }
   return weakPointers;
