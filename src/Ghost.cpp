@@ -8,9 +8,9 @@
 #include "../include/Maze.h"
 #include "../include/Pacman.h"
 
-pacman::Ghost::Ghost(long y, long x, std::weak_ptr<Maze> maze,
-                     std::weak_ptr<Pacman> pacman)
-    : Agent(y, x, GHOST_VELOCITY, maze), pacman(pacman) {}
+pacman::Ghost::Ghost(long y, long x, std::weak_ptr<Maze> maze_weak_ptr,
+                     std::weak_ptr<Pacman> pacman_weak_ptr)
+    : Agent(y, x, GHOST_VELOCITY, maze_weak_ptr), pacman_weak_ptr(pacman_weak_ptr) {}
 
 void pacman::Ghost::start() {
   Agent::start();
@@ -20,6 +20,8 @@ void pacman::Ghost::start() {
     std::this_thread::sleep_for(std::chrono::milliseconds(30));
 
     // Calculate which cell to go to next
+    auto maze = maze_weak_ptr.lock();
+    auto pacman = pacman_weak_ptr.lock();
     long cellHeight = maze->getCellHeight(), cellWidth = maze->getCellWidth();
     std::pair<int, int> currentCellPosition(getY() / cellHeight,
                                             getX() / cellWidth);
@@ -74,8 +76,9 @@ pacman::Ghost::astar(std::pair<int, int> startCell, std::pair<int, int> endCell,
                                         std::pair<int, int> endCell)>
                          heuristic) {
 
-  int numRows = maze->getMazeMatrix()->size();
-  int numCols = maze->getMazeMatrix()->begin()->size();
+  auto maze_matrix = maze_weak_ptr.lock()->getMazeMatrix().lock();
+  int numRows = maze_matrix->size();
+  int numCols = maze_matrix->begin()->size();
 
   // Pre-create all nodes.
   std::vector<std::vector<Node>> nodes;
@@ -135,8 +138,8 @@ pacman::Ghost::astar(std::pair<int, int> startCell, std::pair<int, int> endCell,
       // If candidate isn't possible in possible maze, don't consider it.
       // Further, if the planned location overlaps with any agent besides
       // itself, don't consider it.
-      if (!maze->isCellValid(*candidate) ||
-          maze->isGhostInCell(*candidate)) {
+      auto maze = maze_weak_ptr.lock();
+      if (!maze->isCellValid(*candidate) || maze->isGhostInCell(*candidate)) {
         continue;
       }
 

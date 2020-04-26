@@ -14,7 +14,7 @@ pacman::Game::Game(std::string gameConfigFolderPath,
                    std::string imgFolderPath) {
   initMaze(gameConfigFolderPath + "/maze");
   initAgents(gameConfigFolderPath + "/agents");
-  maze->injectAgents(pacman, ghosts);
+  maze->injectAgents(pacman, getGhostsWeakPointers());
   initUI(imgFolderPath);
 }
 
@@ -23,10 +23,10 @@ void pacman::Game::start() {
       std::async(std::launch::async, [this]() { pacman->start(); });
 
   std::vector<std::future<void>> ghostFutures;
-  for (auto ghost_iter = ghosts->begin(); ghost_iter < ghosts->end();
+  for (auto ghost_iter = ghosts.begin(); ghost_iter < ghosts.end();
        ghost_iter++) {
     ghostFutures.push_back(std::async(std::launch::async,
-                                      [ghost_iter]() { ghost_iter->start(); }));
+                                      [ghost_iter]() { (*ghost_iter)->start(); }));
   }
 
   sdlWrapper->start();
@@ -37,9 +37,9 @@ void pacman::Game::stop(std::string message) {
 
   pacman->stop();
 
-  for (auto ghost_iter = ghosts->begin(); ghost_iter < ghosts->end();
+  for (auto ghost_iter = ghosts.begin(); ghost_iter < ghosts.end();
        ghost_iter++) {
-    ghost_iter->stop();
+    (*ghost_iter)->stop();
   }
 
   sdlWrapper->stop();
@@ -65,13 +65,13 @@ void pacman::Game::initAgents(std::string agentsConfigPath) {
   for (auto ghostIndices : ghostIndicesVector) {
     y = indexToLocation(ghostIndices.first, CELL_HEIGHT);
     x = indexToLocation(ghostIndices.second, CELL_WIDTH);
-    ghosts->push_back(Ghost(y, x, maze, pacman));
+    ghosts.push_back(std::make_shared<Ghost>(y, x, maze, pacman));
   }
 }
 
 void pacman::Game::initUI(std::string imgFolderPath) {
   sdlWrapper =
-      std::make_unique<SDLWrapper>(maze, pacman, ghosts, imgFolderPath);
+      std::make_unique<SDLWrapper>(maze, pacman, getGhostsWeakPointers(), imgFolderPath);
 }
 
 std::vector<std::pair<int, int>>
@@ -108,4 +108,12 @@ pacman::Game::parseIndicesByPrefix(std::string agentsConfigPath,
 
 long pacman::Game::indexToLocation(int index, long scale) {
   return index * scale + scale / 2;
+}
+
+std::vector<std::weak_ptr<pacman::Ghost>> pacman::Game::getGhostsWeakPointers() {
+  std::vector<std::weak_ptr<Ghost>> weakPointers;
+  for (auto ghost_iter = ghosts.begin(); ghost_iter < ghosts.end(); ghost_iter++) {
+    weakPointers.push_back((*ghost_iter));
+  }
+  return weakPointers;
 }

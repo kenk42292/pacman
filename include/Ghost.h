@@ -12,9 +12,7 @@ class Pacman;
 class Ghost : public Agent {
 
 public:
-  static const long GHOST_VELOCITY =
-      2; // same as pacman. However, ghosts are slower anyway, because of A*
-         // search latency.
+  static const long GHOST_VELOCITY = 2;
   Ghost(long y, long x, std::weak_ptr<Maze> maze,
         std::weak_ptr<Pacman> pacman);
   void start();
@@ -51,7 +49,7 @@ private:
                           std::pair<int, int> endCell);
 
   /** Reference to pacman  */
-  std::weak_ptr<Pacman> pacman;
+  std::weak_ptr<Pacman> pacman_weak_ptr;
 };
 } // namespace pacman
 

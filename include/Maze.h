@@ -18,7 +18,7 @@ public:
   Maze(std::string mazeFilePathx, long cellHeight, long cellWidth);
 
   /** Gives agent references to maze. */
-  void injectAgents(std::weak_ptr<Pacman> pacman, std::weak_ptr<std::vector<Ghost>> ghosts);
+  void injectAgents(std::weak_ptr<Pacman> pacman, std::vector<std::weak_ptr<Ghost>> ghosts);
 
   /** Returns whether the given location (in pixels) is a valid place for an agent to be centered on. */
   bool isValid(std::pair<long, long> location);
@@ -54,9 +54,9 @@ public:
   std::weak_ptr<std::vector<std::vector<Cell>>> getMazeMatrix();
   
 private:
-  std::weak_ptr<std::vector<std::vector<Cell>>> mazeMatrix;
+  std::shared_ptr<std::vector<std::vector<Cell>>> mazeMatrix;
   std::weak_ptr<Pacman> pacman;
-  std::weak_ptr<std::vector<Ghost>> ghosts;
+  std::vector<std::weak_ptr<Ghost>> ghosts;
   long cellHeight;
   long cellWidth;
 };

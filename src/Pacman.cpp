@@ -34,6 +34,8 @@ void pacman::Pacman::start() {
       break;
     }
 
+    auto maze = maze_weak_ptr.lock();
+
     // Eat Pellet
     std::pair<long, long> currentLocation = std::make_pair(getY(), getX());
     bool pelletEaten = maze->clearPellet(currentLocation);
@@ -140,6 +142,7 @@ std::pair<long, long> pacman::Pacman::nextLocation(Orientation orientation) {
 
 std::pair<long, long>
 pacman::Pacman::nextCellLocation(Orientation orientation) {
+  auto maze = maze_weak_ptr.lock();
   bool isCellAligned = maze->isCellAligned(std::make_pair(getY(), getX()));
   long y = getY(), x = getX();
   long cellHeight = maze->getCellHeight();

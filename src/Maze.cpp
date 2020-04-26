@@ -8,25 +8,26 @@
 #include "../include/Pacman.h"
 
 pacman::Maze::Maze(std::string mazeFilePath, long cellHeight, long cellWidth)
-    : mazeMatrix(readMazeMatrix(mazeFilePath)), cellHeight(cellHeight), cellWidth(cellWidth) {}
+    : mazeMatrix(readMazeMatrix(mazeFilePath)), cellHeight(cellHeight),
+      cellWidth(cellWidth) {}
 
 long pacman::Maze::getCellHeight() { return cellHeight; }
 
 long pacman::Maze::getCellWidth() { return cellWidth; }
 
-std::shared_ptr<std::vector<std::vector<pacman::Maze::Cell>>>
+std::weak_ptr<std::vector<std::vector<pacman::Maze::Cell>>>
 pacman::Maze::getMazeMatrix() {
   return mazeMatrix;
 }
 
-void pacman::Maze::injectAgents(std::shared_ptr<Pacman> pacman,
-                                std::weak_ptr<std::vector<Ghost>> ghosts) {
+void pacman::Maze::injectAgents(std::weak_ptr<Pacman> pacman,
+                                std::vector<std::weak_ptr<Ghost>> ghosts) {
   this->pacman = pacman;
   this->ghosts = ghosts;
 }
 
 bool pacman::Maze::isValid(std::pair<long, long> location) {
-  int numRows = mazeMatrix->size(), numColumns = mazeMatrix->at(0).size();
+  int numRows = mazeMatrix->size(), numColumns = mazeMatrix->begin()->size();
   long upperLeftY = location.first - cellHeight / 2;
   long upperLeftX = location.second - cellWidth / 2;
   long lowerRightY = location.first + cellHeight / 2 - 1;
@@ -59,13 +60,13 @@ bool pacman::Maze::isAxisAligned(std::pair<long, long> location) {
 }
 
 bool pacman::Maze::isGhostInCell(std::pair<long, long> coordinates) {
-    std::shared_ptr<std::vector<Ghost>> ghosts_shared_ptr = ghosts.lock();
-  for (auto ghost_iter = ghosts_shared_ptr->begin(); ghost_iter < ghosts_shared_ptr->end(); ghost_iter++) {
-      int i = ghost_iter->getY()/cellHeight;
-      int j = ghost_iter->getX()/cellWidth;
-      if (i == coordinates.first && j == coordinates.second) {
-          return true;
-      }
+  for (auto ghost_iter = ghosts.begin(); ghost_iter < ghosts.end(); ghost_iter++) {
+    auto ghost = (*ghost_iter).lock();
+    int i = ghost->getY() / cellHeight;
+    int j = ghost->getX() / cellWidth;
+    if (i == coordinates.first && j == coordinates.second) {
+      return true;
+    }
   }
   return false;
 }

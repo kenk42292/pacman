@@ -2,7 +2,7 @@
 #include "../include/Agent.h"
 #include "../include/Maze.h"
 
-pacman::Agent::Agent(long y, long x, long velocity, std::weak_ptr<Maze> maze) : y(y), x(x), velocity(velocity), maze(maze), alive(false) {}
+pacman::Agent::Agent(long y, long x, long velocity, std::weak_ptr<Maze> maze_weak_ptr) : y(y), x(x), velocity(velocity), maze_weak_ptr(maze_weak_ptr), alive(false) {}
 
 void pacman::Agent::start() {
     alive.store(true);

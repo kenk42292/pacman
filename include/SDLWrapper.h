@@ -14,8 +14,8 @@ namespace pacman {
 
 class SDLWrapper {
 public:
-  SDLWrapper(std::weak_ptr<Maze> maze, std::weak_ptr<Pacman> pacman,
-             std::weak_ptr<std::vector<Ghost>> ghosts,
+  SDLWrapper(std::weak_ptr<Maze> maze, std::weak_ptr<Pacman> pacman_weak_ptr,
+             std::vector<std::weak_ptr<Ghost>> ghosts,
              std::string imgFolderPath);
   ~SDLWrapper();
   void start();
@@ -32,8 +32,8 @@ private:
   bool quit = false;
   SDL_Event e;
   std::weak_ptr<std::vector<std::vector<Maze::Cell>>> mazeMatrix;
-  std::weak_ptr<Pacman> pacman;
-  std::weak_ptr<std::vector<Ghost>> ghosts;
+  std::weak_ptr<Pacman> pacman_weak_ptr;
+  std::vector<std::weak_ptr<Ghost>> ghosts;
   long cellHeight;
   long cellWidth;
   int numRows;

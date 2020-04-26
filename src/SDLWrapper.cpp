@@ -13,10 +13,10 @@
 #include "../include/SDLWrapper.h"
 
 pacman::SDLWrapper::SDLWrapper(std::weak_ptr<Maze> maze_ptr,
-                                   std::weak_ptr<Pacman> pacman_ptr,
-                                   std::weak_ptr<std::vector<Ghost>> ghosts_ptr,
-                                   std::string imgFolderPath)
-    : pacman(pacman), ghosts(ghosts), imgFolderPath(imgFolderPath) {
+                               std::weak_ptr<Pacman> pacman_weak_ptr,
+                               std::vector<std::weak_ptr<Ghost>> ghosts,
+                               std::string imgFolderPath)
+    : pacman_weak_ptr(pacman_weak_ptr), ghosts(ghosts), imgFolderPath(imgFolderPath) {
   auto maze = maze_ptr.lock();
   mazeMatrix = maze->getMazeMatrix();
   cellHeight = maze->getCellHeight();
@@ -47,17 +47,17 @@ void pacman::SDLWrapper::start() {
     while (SDL_PollEvent(&e) != 0) {
       if (e.type == SDL_QUIT) {
         quit = true;
-        pacman.lock()->stop();
+        pacman_weak_ptr.lock()->stop();
       } else if (e.type == SDL_KEYDOWN) {
         if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
           quit = true;
-          pacman.lock()->stop();
-          auto ghosts_ptr = ghosts.lock();
-          for (auto ghost_iter = ghosts_ptr->begin(); ghost_iter < ghosts_ptr->end(); ghost_iter++) {
-            ghost_iter->stop();
+          pacman_weak_ptr.lock()->stop();
+          for (auto ghost_iter = ghosts.begin(); ghost_iter < ghosts.end();
+               ghost_iter++) {
+            (*ghost_iter).lock()->stop();
           }
         } else {
-          pacman.lock()->onKeyEvent(e.key.keysym.scancode);
+          pacman_weak_ptr.lock()->onKeyEvent(e.key.keysym.scancode);
         }
       }
     }
@@ -185,7 +185,7 @@ void pacman::SDLWrapper::renderMaze() {
 }
 
 void pacman::SDLWrapper::renderPacman() {
-  auto pacman_shared = pacman.lock();
+  auto pacman_shared = pacman_weak_ptr.lock();
   long y = pacman_shared->getY(), x = pacman_shared->getX();
 
   SDL_Rect block;
@@ -196,16 +196,16 @@ void pacman::SDLWrapper::renderPacman() {
   long mouthDegrees =
       pacman_shared
           ->getMouthDegrees(); // TODO: Make this thread-safe. Just atomic_long
-  SDL_RenderCopyEx(sdlRenderer,
-                   mouthDegreesToTexture(pacman_shared->getMouthDegrees()), NULL,
-                   &block, orientationToDegrees(pacman_shared->getOrientation()), NULL,
-                   SDL_RendererFlip::SDL_FLIP_NONE);
+  SDL_RenderCopyEx(
+      sdlRenderer, mouthDegreesToTexture(pacman_shared->getMouthDegrees()),
+      NULL, &block, orientationToDegrees(pacman_shared->getOrientation()), NULL,
+      SDL_RendererFlip::SDL_FLIP_NONE);
 }
 
 void pacman::SDLWrapper::renderGhosts() {
-  auto ghosts_shared = ghosts.lock();
-  for (int i = 0; i < ghosts_shared->size(); i++) {
-    long y = ghosts_shared->at(i).getY(), x = ghosts_shared->at(i).getX();
+  for (int i = 0; i < ghosts.size(); i++) {
+    auto ghost = ghosts.at(i).lock();
+    long y = ghost->getY(), x = ghost->getX();
     SDL_Rect block;
     block.y = y - cellHeight / 2;
     block.x = x - cellHeight / 2;
@@ -216,8 +216,7 @@ void pacman::SDLWrapper::renderGhosts() {
   }
 }
 
-long pacman::SDLWrapper::orientationToDegrees(
-    Pacman::Orientation orientation) {
+long pacman::SDLWrapper::orientationToDegrees(Pacman::Orientation orientation) {
   switch (orientation) {
   case Pacman::Orientation::UP:
     return 270;
@@ -249,7 +248,7 @@ std::string pacman::SDLWrapper::getPacmanImage() {
 }
 
 void pacman::SDLWrapper::maybeThrowRuntimeError(bool throwError,
-                                                    std::string message) {
+                                                std::string message) {
   if (throwError) {
     std::cout << message << '\n';
     throw std::runtime_error(message);

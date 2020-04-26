@@ -39,16 +39,24 @@ public:
   void stop(std::string message);
 
 private:
+  // The major components of the game that Game owns.
   std::shared_ptr<Maze> maze;
   std::shared_ptr<Pacman> pacman;
-  std::shared_ptr<std::vector<Ghost*>> ghosts;
+  std::vector<std::shared_ptr<Ghost>> ghosts;
   std::unique_ptr<SDLWrapper> sdlWrapper;
+
+  // Initialization of above major components.
   void initMaze(std::string mazeConfigPath);
   void initAgents(std::string agentsConfigPath);
   void initUI(std::string imgFolderPath);
+
+  // Some helper methods to parse config.
   std::vector<std::pair<int, int>>
   parseIndicesByPrefix(std::string agentsConfigPath, std::string agent);
   long indexToLocation(int index, long scale);
+
+  // Helper to get vector of weak_ptrs from vector of shared_ptrs, to share reference of ghosts.
+  std::vector<std::weak_ptr<Ghost>> getGhostsWeakPointers();
 };
 
 } // namespace pacman
