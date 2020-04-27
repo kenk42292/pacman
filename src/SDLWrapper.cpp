@@ -43,6 +43,31 @@ pacman::SDLWrapper::~SDLWrapper() {
   SDL_Quit();
 }
 
+pacman::SDLWrapper::SDLWrapper(const SDLWrapper& other) {
+  // Re-use assignment operator, as same operators are performed.
+  *this = other;
+}
+
+pacman::SDLWrapper& pacman::SDLWrapper::operator=(const SDLWrapper& other) {
+  if (this == &other) {
+    return *this;
+  }
+  initSDL();
+  initWindow();
+  initRenderer();
+  initTextures();
+  game_weak_ptr = other.game_weak_ptr;
+  mazeMatrix = other.mazeMatrix;
+  pacman_weak_ptr = other.pacman_weak_ptr;
+  ghosts = other.ghosts;
+  cellHeight = other.cellHeight;
+  cellWidth = other.cellWidth;
+  numRows = other.numRows;
+  numCols = other.numCols;
+  imgFolderPath = other.imgFolderPath;
+  return *this;
+}
+
 void pacman::SDLWrapper::processInputEvents() {
 
   // process events until event queue is empty.

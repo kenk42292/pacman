@@ -11,8 +11,8 @@
 pacman::Pacman::Pacman(long y, long x, std::weak_ptr<Maze> maze_weak_ptr,
                        std::weak_ptr<Game> game_weak_ptr, int goalNumPellets)
     : Agent(y, x, PACMAN_VELOCITY, maze_weak_ptr), game_weak_ptr(game_weak_ptr),
-      goalNumPellets(goalNumPellets), orientation(UP), desiredOrientation(UP),
-      mouthDegrees(0), mouthDirection(OPENING) {}
+      goalNumPellets(goalNumPellets), numPelletsEaten(0), orientation(UP),
+      desiredOrientation(UP), mouthDegrees(0), mouthDirection(OPENING) {}
 
 void pacman::Pacman::start() {
   Agent::start();

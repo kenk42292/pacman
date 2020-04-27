@@ -1,14 +1,29 @@
 
+#include <signal.h>
+
 #include "../include/Game.h"
 
-int main(void)
-{    
-    // TODO: Update to be non-absolute, so it can run on other computers...
-    std::string gameConfigFolderPath = "/home/ken/udacity/pacman/res/gameconfigs/game2";
-    std::string imgFolderPath = "/home/ken/udacity/pacman/res/img";
+std::shared_ptr<pacman::Game> game;
 
-    // Must create shared_ptr to this intended singleton, to allow use of shared_from_this.
-    auto game = pacman::Game::create(gameConfigFolderPath, imgFolderPath);
-    game->start();
-    return 0;
+/** Force-quit call-back. Register for when user uses Ctrl-C (or something
+ * similar) to terminate program. This is needed to prevent rogue threads from
+ * becoming a zombie.*/
+void signal_callback(int signum) {
+  game->stop("Signal[" + std::to_string(signum) + "] caught.");
+}
+
+int main(void) {
+
+  // Register handler for force-quitting via Ctrl-C (or similar).
+  signal(SIGINT, signal_callback);
+
+  // Hard-coded paths to resources.
+  std::string gameConfigFolderPath =
+      "../res/gameconfigs/game1";
+  std::string imgFolderPath = "../res/img";
+
+  // Create and start game.
+  game = pacman::Game::create(gameConfigFolderPath, imgFolderPath);
+  game->start();
+  return 0;
 }

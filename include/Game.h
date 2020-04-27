@@ -21,7 +21,8 @@ class Ghost;
  */
 class Game : public std::enable_shared_from_this<Game> {
 public:
-  /** A static factory method to create a game. */
+  /** A static factory method to create a game. This replaces the role of the
+   * constructor. This allows the use of shared_from_this. */
   template <typename... T>
   static std::shared_ptr<pacman::Game> create(T &&... t) {
     auto shared_ptr = std::shared_ptr<Game>(new Game(std::forward<T>(t)...));
@@ -67,7 +68,8 @@ private:
   parseIndicesByPrefix(std::string agentsConfigPath, std::string agent);
   long indexToLocation(int index, long scale);
 
-  /** Helper to get vector of weak_ptrs from vector of shared_ptrs, to share reference of ghosts. */
+  /** Helper to get vector of weak_ptrs from vector of shared_ptrs, to share
+   * reference of ghosts. */
   std::vector<std::weak_ptr<Ghost>> getGhostsWeakPointers();
 
   /** Whether the game is running or not. */
