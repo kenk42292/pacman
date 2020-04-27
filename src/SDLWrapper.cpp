@@ -44,7 +44,7 @@ pacman::SDLWrapper::~SDLWrapper() {
 }
 
 pacman::SDLWrapper::SDLWrapper(const SDLWrapper& other) {
-  // Re-use assignment operator, as same operators are performed.
+  // Re-use assignment operator, as same operations are performed.
   *this = other;
 }
 

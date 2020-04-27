@@ -19,7 +19,7 @@ int main(void) {
 
   // Hard-coded paths to resources.
   std::string gameConfigFolderPath =
-      "../res/gameconfigs/game1";
+      "../res/gameconfigs/game3";
   std::string imgFolderPath = "../res/img";
 
   // Create and start game.
