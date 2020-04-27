@@ -1,9 +1,11 @@
 #include <algorithm>
+#include <chrono>
 #include <fstream>
 #include <future>
 #include <iostream>
 #include <string>
 #include <utility>
+#include <thread>
 
 #include "../include/Game.h"
 #include "../include/Ghost.h"
@@ -39,6 +41,9 @@ void pacman::Game::start() {
     sdlWrapper->processInputEvents();
     sdlWrapper->render();
   }
+
+  // Slight pause to linger on UI scene.
+  std::this_thread::sleep_for(std::chrono::seconds(2));
 }
 
 void pacman::Game::stop(std::string message) {
