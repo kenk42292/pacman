@@ -52,6 +52,7 @@ public:
   long getCellHeight();
   long getCellWidth();
   std::weak_ptr<std::vector<std::vector<Cell>>> getMazeMatrix();
+  int getNumPellets();
   
 private:
   std::shared_ptr<std::vector<std::vector<Cell>>> mazeMatrix;

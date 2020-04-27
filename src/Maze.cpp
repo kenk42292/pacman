@@ -130,3 +130,15 @@ pacman::Maze::Cell pacman::Maze::charToCell(char &c) {
                                 "] to be converted to cell.");
   }
 }
+
+int pacman::Maze::getNumPellets() {
+  int numPellets = 0;
+  for (auto row = mazeMatrix->begin(); row < mazeMatrix->end(); row++) {
+    for (auto col = row->begin(); col < row->end(); col++) {
+      if (*col == Maze::Cell::kPellet) {
+        numPellets++;
+      }
+    }
+  }
+  return numPellets;
+}

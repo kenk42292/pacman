@@ -67,11 +67,10 @@ private:
   parseIndicesByPrefix(std::string agentsConfigPath, std::string agent);
   long indexToLocation(int index, long scale);
 
-  // Helper to get vector of weak_ptrs from vector of shared_ptrs, to share
-  // reference of ghosts.
+  /** Helper to get vector of weak_ptrs from vector of shared_ptrs, to share reference of ghosts. */
   std::vector<std::weak_ptr<Ghost>> getGhostsWeakPointers();
 
-  // Whether the game is running or not.
+  /** Whether the game is running or not. */
   std::atomic_bool running;
 };
 

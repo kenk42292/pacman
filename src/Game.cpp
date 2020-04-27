@@ -68,7 +68,7 @@ void pacman::Game::initAgents(std::string agentsConfigPath) {
   auto pacmanIndeces = pacmanIndicesVector.at(0);
   y = indexToLocation(pacmanIndeces.first, CELL_HEIGHT);
   x = indexToLocation(pacmanIndeces.second, CELL_WIDTH);
-  pacman = std::make_shared<Pacman>(y, x, maze, shared_from_this());
+  pacman = std::make_shared<Pacman>(y, x, maze, shared_from_this(), maze->getNumPellets());
 
   auto ghostIndicesVector = parseIndicesByPrefix(agentsConfigPath, GHOST);
   for (auto ghostIndices : ghostIndicesVector) {

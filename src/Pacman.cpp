@@ -9,9 +9,9 @@
 #include "../include/Pacman.h"
 
 pacman::Pacman::Pacman(long y, long x, std::weak_ptr<Maze> maze_weak_ptr,
-                       std::weak_ptr<Game> game_weak_ptr)
-    : Agent(y, x, PACMAN_VELOCITY, maze_weak_ptr),
-      game_weak_ptr(game_weak_ptr), orientation(UP), desiredOrientation(UP),
+                       std::weak_ptr<Game> game_weak_ptr, int goalNumPellets)
+    : Agent(y, x, PACMAN_VELOCITY, maze_weak_ptr), game_weak_ptr(game_weak_ptr),
+      goalNumPellets(goalNumPellets), orientation(UP), desiredOrientation(UP),
       mouthDegrees(0), mouthDirection(OPENING) {}
 
 void pacman::Pacman::start() {
@@ -44,6 +44,9 @@ void pacman::Pacman::start() {
     bool pelletEaten = maze->clearPellet(currentLocation);
     if (pelletEaten) {
       numPelletsEaten++;
+      if (numPelletsEaten >= goalNumPellets) {
+        game_weak_ptr.lock()->stop("Pacman wins!");
+      }
     }
 
     // Move

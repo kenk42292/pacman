@@ -18,7 +18,7 @@ public:
   enum MouthDirection {OPENING, CLOSING};
 
   static const long PACMAN_VELOCITY = 3;
-  Pacman(long y, long x, std::weak_ptr<Maze> maze_weak_ptr, std::weak_ptr<Game> game_weak_ptr);
+  Pacman(long y, long x, std::weak_ptr<Maze> maze_weak_ptr, std::weak_ptr<Game> game_weak_ptr, int goalNumPellets);
   void start();
   long getMouthDegrees();
   Orientation getOrientation();
@@ -35,6 +35,7 @@ private:
   std::pair<long, long> nextLocation(Orientation orientation);
   std::pair<long, long> nextCellLocation(Orientation orientation);
   std::atomic_long numPelletsEaten;
+  int goalNumPellets;
 };
 
 } // namespace pacman
