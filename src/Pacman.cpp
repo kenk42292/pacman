@@ -8,6 +8,9 @@
 #include "../include/Maze.h"
 #include "../include/Pacman.h"
 
+const long pacman::Pacman::PACMAN_VELOCITY = 3;
+const long pacman::Pacman::PACMAN_DELAY_MILLIS = 20;
+
 pacman::Pacman::Pacman(long y, long x, std::weak_ptr<Maze> maze_weak_ptr,
                        std::weak_ptr<Game> game_weak_ptr, int goalNumPellets)
     : Agent(y, x, PACMAN_VELOCITY, maze_weak_ptr), game_weak_ptr(game_weak_ptr),
@@ -19,7 +22,8 @@ void pacman::Pacman::start() {
   while (alive.load()) {
 
     // Delay
-    std::this_thread::sleep_for(std::chrono::milliseconds(30));
+    // long a = PACMAN_DELAY_MILLIS;
+    std::this_thread::sleep_for(std::chrono::milliseconds(PACMAN_DELAY_MILLIS));
 
     // Move mouth
     switch (mouthDirection) {
@@ -81,7 +85,6 @@ void pacman::Pacman::start() {
           x.store(nextCellLocation.second);
         }
       } else {
-        // TODO: Refine, if it jitters when stopping at cells
         if (maze->distance(currentLocation, nextLocation) <
             maze->distance(currentLocation, nextCellLocation))
         // Not going to reach the next cell location.

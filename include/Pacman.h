@@ -17,12 +17,18 @@ public:
   enum Orientation { UP, DOWN, LEFT, RIGHT };
   enum MouthDirection {OPENING, CLOSING};
 
-  static const long PACMAN_VELOCITY = 3;
+  static const long PACMAN_VELOCITY;
+  static const long PACMAN_DELAY_MILLIS;
+
   Pacman(long y, long x, std::weak_ptr<Maze> maze_weak_ptr, std::weak_ptr<Game> game_weak_ptr, int goalNumPellets);
-  void start();
+  void start() override;
   long getMouthDegrees();
   Orientation getOrientation();
+
+  /** Notify pacman of key event, to control its movement. */
   void onKeyEvent(int scanCode);
+
+  /** Override << operator for printability. */
   friend std::ostream &operator<<(std::ostream &outputStream,
                                   const Pacman &pacman);
 

@@ -9,29 +9,38 @@ namespace pacman {
 class Ghost;
 class Pacman;
 
+/** Wraps around (and owns) the internal maze representation (2-d vector of Cell
+ * enums). Offers convenience methods to aid in agent movement. */
 class Maze {
 public:
   /** Internal representation of maze is as 2-D vector of following cells. */
   enum Cell { kEmpty, kPellet, kBorder };
-  
-  /** Creates a maze with internal maze matrix representation, with specified cell dimensions. */
+
+  /** Creates a maze with internal maze matrix representation, with specified
+   * cell dimensions. */
   Maze(std::string mazeFilePathx, long cellHeight, long cellWidth);
 
   /** Gives agent references to maze. */
-  void injectAgents(std::weak_ptr<Pacman> pacman, std::vector<std::weak_ptr<Ghost>> ghosts);
+  void injectAgents(std::weak_ptr<Pacman> pacman,
+                    std::vector<std::weak_ptr<Ghost>> ghosts);
 
-  /** Returns whether the given location (in pixels) is a valid place for an agent to be centered on. */
+  /** Returns whether the given location (in pixels) is a valid place for an
+   * agent to be centered on. */
   bool isValid(std::pair<long, long> location);
 
-  /** Returns whether the given cell coordinate is a valid cell for an agent to be in. */
+  /** Returns whether the given cell coordinate is a valid cell for an agent to
+   * be in. */
   bool isCellValid(std::pair<int, int> coordinates);
 
-  /** Returns whether the given location (in pixels) is aligned(at the center of) a cell. */
+  /** Returns whether the given location (in pixels) is aligned(at the center
+   * of) a cell. */
   bool isCellAligned(std::pair<long, long> location);
 
-  /** Returns whether the given location (in pixels) is aligned to a row or column. */
+  /** Returns whether the given location (in pixels) is aligned to a row or
+   * column. */
   bool isAxisAligned(std::pair<long, long> location);
 
+  /** Convenience method to find rounded distance between two locations. */
   long distance(std::pair<long, long> a, std::pair<long, long> b);
 
   /** Removes a pellet from the maze, if the agent overlaps with it. */
@@ -41,10 +50,11 @@ public:
   bool isGhostInCell(std::pair<long, long> location);
 
   /** Reads the maze matrix from the given file. */
-  std::shared_ptr<std::vector<std::vector<Maze::Cell>>> readMazeMatrix(std::string mazeFilePath);
+  std::shared_ptr<std::vector<std::vector<Maze::Cell>>>
+  readMazeMatrix(std::string mazeFilePath);
 
   /** Utility for reading maze matrix. */
-  Maze::Cell charToCell(char & c);
+  Maze::Cell charToCell(char &c);
 
   // Getters and Setters.
   std::weak_ptr<Pacman> getPacman();
@@ -53,7 +63,7 @@ public:
   long getCellWidth();
   std::weak_ptr<std::vector<std::vector<Cell>>> getMazeMatrix();
   int getNumPellets();
-  
+
 private:
   std::shared_ptr<std::vector<std::vector<Cell>>> mazeMatrix;
   std::weak_ptr<Pacman> pacman;

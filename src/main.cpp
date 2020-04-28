@@ -12,15 +12,23 @@ void signal_callback(int signum) {
   game->stop("Signal[" + std::to_string(signum) + "] caught.");
 }
 
-int main(void) {
+int main(int argc, char** argv) {
 
   // Register handler for force-quitting via Ctrl-C (or similar).
   signal(SIGINT, signal_callback);
 
   // Hard-coded paths to resources.
   std::string gameConfigFolderPath =
-      "../res/gameconfigs/game3";
+      "../res/gameconfigs/game1";
   std::string imgFolderPath = "../res/img";
+
+  // If user specified which game config is desired.
+  if (argc == 2) {
+    std::string configNum = std::string(argv[1]);
+    if (1 <= stoi(configNum) && stoi(configNum) <= 5) {
+      gameConfigFolderPath = "../res/gameconfigs/game" + configNum;
+    }
+  }
 
   // Create and start game.
   game = pacman::Game::create(gameConfigFolderPath, imgFolderPath);

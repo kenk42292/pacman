@@ -13,11 +13,13 @@ class Pacman;
 class Ghost : public Agent {
 
 public:
-  static const long GHOST_VELOCITY = 2;
+  static const long GHOST_VELOCITY;
+  static const long GHOST_DELAY_MILLIS;
+
   Ghost(long y, long x, std::weak_ptr<Maze> maze,
         std::weak_ptr<Pacman> pacman_weak_ptr,
         std::weak_ptr<Game> game_weak_ptr);
-  void start();
+  void start() override;
   friend std::ostream &operator<<(std::ostream &outputStream,
                                   const pacman::Ghost &ghost);
 

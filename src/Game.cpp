@@ -4,16 +4,23 @@
 #include <future>
 #include <iostream>
 #include <string>
-#include <utility>
 #include <thread>
+#include <utility>
 
 #include "../include/Game.h"
 #include "../include/Ghost.h"
 #include "../include/Pacman.h"
 #include "../include/SDLWrapper.h"
 
+const long pacman::Game::CELL_WIDTH = 20;
+const long pacman::Game::CELL_HEIGHT = 20;
+const std::string pacman::Game::PACMAN = "pacman";
+const std::string pacman::Game::GHOST = "ghost";
+const char pacman::Game::DELIM = ',';
+
 pacman::Game::Game(std::string gameConfigFolderPath, std::string imgFolderPath)
-    : gameConfigFolderPath(gameConfigFolderPath), imgFolderPath(imgFolderPath) {}
+    : gameConfigFolderPath(gameConfigFolderPath), imgFolderPath(imgFolderPath) {
+}
 
 void pacman::Game::initialize() {
   initMaze(gameConfigFolderPath + "/maze");
@@ -24,7 +31,7 @@ void pacman::Game::initialize() {
 
 void pacman::Game::start() {
 
-  // Game Logic in the background.
+  // Start Game Logic in the background.
   auto pacmanFuture =
       std::async(std::launch::async, [this]() { pacman->start(); });
 
@@ -35,14 +42,15 @@ void pacman::Game::start() {
         std::launch::async, [ghost_iter]() { (*ghost_iter)->start(); }));
   }
 
-  // Start Game Loop.
+  // Start Game Loop on main thread. Note that the typical 'update' phase is not
+  // included, as game logic is concurrently taking place in the background.
   running = true;
   while (running) {
     sdlWrapper->processInputEvents();
     sdlWrapper->render();
   }
 
-  // Slight pause to linger on UI scene.
+  // Slight pause to linger on UI scene when game ends.
   std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -73,13 +81,15 @@ void pacman::Game::initAgents(std::string agentsConfigPath) {
   auto pacmanIndeces = pacmanIndicesVector.at(0);
   y = indexToLocation(pacmanIndeces.first, CELL_HEIGHT);
   x = indexToLocation(pacmanIndeces.second, CELL_WIDTH);
-  pacman = std::make_shared<Pacman>(y, x, maze, shared_from_this(), maze->getNumPellets());
+  pacman = std::make_shared<Pacman>(y, x, maze, shared_from_this(),
+                                    maze->getNumPellets());
 
   auto ghostIndicesVector = parseIndicesByPrefix(agentsConfigPath, GHOST);
   for (auto ghostIndices : ghostIndicesVector) {
     y = indexToLocation(ghostIndices.first, CELL_HEIGHT);
     x = indexToLocation(ghostIndices.second, CELL_WIDTH);
-    ghosts.push_back(std::make_shared<Ghost>(y, x, maze, pacman, shared_from_this()));
+    ghosts.push_back(
+        std::make_shared<Ghost>(y, x, maze, pacman, shared_from_this()));
   }
 }
 
@@ -92,14 +102,16 @@ std::vector<std::pair<int, int>>
 pacman::Game::parseIndicesByPrefix(std::string agentsConfigPath,
                                    std::string agent) {
   if (agent != PACMAN && agent != GHOST) {
-    throw std::invalid_argument("Agent must be either pacman or ghost.");
+    std::string msg = "Agent must be either pacman or ghost.";
+    std::cout << msg << '\n';
+    throw std::invalid_argument(msg);
   }
 
   std::ifstream agentsConfigFileStream(agentsConfigPath);
   if (!agentsConfigFileStream.is_open()) {
-    std::cout << "Failed to read in input file[" << agentsConfigPath << "]"
-              << '\n';
-    exit(1);
+    std::string msg = "Failed to read in input file[" + agentsConfigPath + "].";
+    std::cout << msg << '\n';
+    throw std::runtime_error(msg);
   }
 
   std::vector<std::pair<int, int>> result;

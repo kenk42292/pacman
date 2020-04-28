@@ -21,6 +21,15 @@ class Ghost;
  */
 class Game : public std::enable_shared_from_this<Game> {
 public:
+  // Some hard-coded cell-width and cell-heights.
+  static const long CELL_WIDTH;
+  static const long CELL_HEIGHT;
+
+  // Constants used for parsing agents config file.
+  static const std::string PACMAN;
+  static const std::string GHOST;
+  static const char DELIM;
+
   /** A static factory method to create a game. This replaces the role of the
    * constructor. This allows the use of shared_from_this. */
   template <typename... T>
@@ -29,15 +38,6 @@ public:
     shared_ptr->initialize();
     return shared_ptr;
   }
-
-  // Some hard-coded cell-width and cell-heights.
-  const long CELL_WIDTH = 20;
-  const long CELL_HEIGHT = 20;
-
-  // Constants used for parsing agents config file.
-  const std::string PACMAN = "pacman";
-  const std::string GHOST = "ghost";
-  const char DELIM = ',';
 
   /** Start the game. */
   void start();
@@ -49,7 +49,14 @@ private:
   // Constructor is private. Must use factory method to create.
   Game(std::string gameConfigFolderPath, std::string imgFolderPath);
   void initialize();
+
+  /** Whether the game is running. The game-loop is conditioned on this. */
+  std::atomic_bool running;
+
+  /** Points to a directory with the agents and maze config files. */
   std::string gameConfigFolderPath;
+
+  /** Img Folder path has resources to render the game. */
   std::string imgFolderPath;
 
   // The major components of the game that Game owns.
@@ -71,9 +78,6 @@ private:
   /** Helper to get vector of weak_ptrs from vector of shared_ptrs, to share
    * reference of ghosts. */
   std::vector<std::weak_ptr<Ghost>> getGhostsWeakPointers();
-
-  /** Whether the game is running or not. */
-  std::atomic_bool running;
 };
 
 } // namespace pacman

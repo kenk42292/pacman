@@ -10,6 +10,9 @@
 #include "../include/Pacman.h"
 #include "../include/Utils.h"
 
+const long pacman::Ghost::GHOST_VELOCITY = 3;
+const long pacman::Ghost::GHOST_DELAY_MILLIS = 40;
+
 pacman::Ghost::Ghost(long y, long x, std::weak_ptr<Maze> maze_weak_ptr,
                      std::weak_ptr<Pacman> pacman_weak_ptr,
                      std::weak_ptr<Game> game_weak_ptr)
@@ -21,7 +24,7 @@ void pacman::Ghost::start() {
   while (alive.load()) {
 
     // Delay
-    std::this_thread::sleep_for(std::chrono::milliseconds(30));
+    std::this_thread::sleep_for(std::chrono::milliseconds(GHOST_DELAY_MILLIS));
 
     // Calculate which cell to go to next
     auto maze = maze_weak_ptr.lock();
@@ -73,7 +76,9 @@ void pacman::Ghost::start() {
     }
 
     // Check if we're overlapping with Pacman. If so, declare end of game.
-    long distanceToPacman = Utils::distance(std::make_pair(this->getY(), this->getX()), std::make_pair(pacman->getY(), pacman->getX()));
+    long distanceToPacman =
+        Utils::distance(std::make_pair(this->getY(), this->getX()),
+                        std::make_pair(pacman->getY(), pacman->getX()));
     if (distanceToPacman < std::min(cellHeight, cellWidth) / 2) {
       game_weak_ptr.lock()->stop("Ghosts win!");
     }
@@ -145,7 +150,7 @@ pacman::Ghost::astar(std::pair<int, int> startCell, std::pair<int, int> endCell,
         continue;
       }
 
-      // If candidate isn't possible in possible maze, don't consider it.
+      // If candidate isn't possible in maze, don't consider it.
       // Further, if the planned location overlaps with any agent besides
       // itself, don't consider it.
       auto maze = maze_weak_ptr.lock();
@@ -166,8 +171,7 @@ pacman::Ghost::astar(std::pair<int, int> startCell, std::pair<int, int> endCell,
       }
     }
   }
-  // Failed. Log and return startCell, to remain in starting cell.
-  std::cout << "Failed to find next node to traverse to.\n";
+  // Failed. Return startCell, to remain in starting cell.
   return startCell;
 }
 
