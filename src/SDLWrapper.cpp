@@ -118,7 +118,7 @@ void pacman::SDLWrapper::initWindow() {
 }
 
 void pacman::SDLWrapper::initRenderer() {
-  Uint32 render_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
+  Uint32 render_flags = SDL_RENDERER_SOFTWARE;
   sdlRenderer = SDL_CreateRenderer(sdlWindow, -1, render_flags);
   maybeThrowRuntimeError(!sdlRenderer, "Error initializing SDL renderer: \n" +
                                            std::string(SDL_GetError()));

@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
 
   // Hard-coded paths to resources.
   std::string gameConfigFolderPath =
-      "../res/gameconfigs/game1";
+      "../res/gameconfigs/game5";
   std::string imgFolderPath = "../res/img";
 
   // If user specified which game config is desired.
